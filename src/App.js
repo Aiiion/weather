@@ -1,22 +1,76 @@
 import logo from './logo.svg';
 import './App.css';
+import View from './View.js';
 
-// const API_ENDPOINT = 'https://opendata-download-metobs.smhi.se/api/version/1.0/parameter/1/station/98230/period/latest-hour/data.json';
+const WEATHER_API_KEY = '79bcff7d3cdc32a45c5fc56923b9ae51';
+const LOACTION_API_KEY = 'm9W0v1SEGJGYinwToG1OG1dzOEnRRirR';
+const LOCATION_SECRET = '95mpGa4jzwDUGX1T';
+const API_BASE_URL = `https://api.darksky.net/forecast/${WEATHER_API_KEY}`
 
-  // const data = fetch(`${API_ENDPOINT}`)
-  const data = fetch('https://opendata-download-metobs.smhi.se/api/version/1.0/parameter/1/station/98230/period/latest-hour/data.json')
-  .then((response) => response.json())
-  .then(data => console.log(data));
+const createApiUrl = ({lat, lng}) => {
+  const latlng = `${lat},${lng}`
+  return `${API_BASE_URL}/${latlng}?&units=si`
+}
 
+
+
+// const functionWithPromise = () => {
+//   return new Promise(resolve => {
+//     setTimeout(() => {
+//       resolve({
+//         lat: position.coords.latitude,
+//         lng: position.coords.longitude
+//       })
+//     }, 3000);
+//   })
+// }
+// const getWeatherByPosition = (position) =>{
+//   fetch(createApiUrl({position.coords.latitude, position.coords.longitude}))
+// }
+const getLatLng = () => {
+  return new Promise ((resolve, reject) => {
+    if(navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(position => resolve({
+        lat: position.coords.latitude,
+        lng: position.coords.longitude
+      })
+      )
+    }else{
+      reject('Cant find your location, try allowing geolocation services in your brower')
+    }
+  })
+}
+const testFunction = () => {
+  try {
+    getLatLng().then(({lat, lng}) => console.log('does it work?', lat && lng, {lat, lng}))
+  } catch (error) {
+    console.log('failure')
+  }
+ 
+}
+  testFunction()
+
+const toJSON = response => response.json()
+
+const getWeatherData= () =>{ 
+  getLatLng()
+  .then(createApiUrl)
+  .then(fetch)
+  .then(toJSON)
+  .then(console.log);
+}
+
+  
 
 function App() {
   return (
+    
     <div className="App">
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
-        {/* {data.map(weather => <div>{weather.value}</div>)} */}
-        <p>{data.parameter.key}</p>
+      
       </header>
+      <View getWeatherData={getWeatherData}/>
     </div>
   );
 }
