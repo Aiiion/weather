@@ -1,13 +1,14 @@
 import './App.css';
-
+import React, { useState } from 'react';
 
 
 function ViewComponent({getWeatherData}) {
-    getWeatherData();
+    
+    // getWeatherData();
     return (
       
       <div className="App">
-        <p>view here</p>
+        <p></p>
         
       </div>
     );
