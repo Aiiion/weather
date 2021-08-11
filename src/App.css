@@ -58,6 +58,19 @@ h1{
   border-bottom: 2px solid white;
   font-size: calc(10px + 2vmin);
 }
+.daily{
+  display:flex;
+  align-items:flex-start;
+  justify-content: space-evenly;
+  font-size: calc(10px + 2vmin);
+  margin-top:1vh;
+  margin-bottom: 1vh;
+}
+.dailyContainer{
+  border:1px solid white;
+  border-radius: 5px;
+  padding:2vw;
+}
 .App-link {
   color: #61dafb;
 }

@@ -50,7 +50,7 @@ const getWeatherData= (setWeather) =>
   .then(toJSON)
   .then(setWeather);
 
-const translateEpoch = (epoch) =>{ //translates the epoch value to time in hours and minutes
+const translateEpochTime = (epoch) =>{ //translates the epoch value to time in hours and minutes
   let date = new Date(epoch * 1000); 
   let hour = date.getHours();
   let minute = date.getMinutes();
@@ -64,9 +64,39 @@ const translateEpoch = (epoch) =>{ //translates the epoch value to time in hours
 
 const trimHoursAt = (weatherHourly) =>{ //detects when the array is at a new day and returns thats value 
   for (let i = 0; i < 23; i++) {
-    if(translateEpoch(weatherHourly[i].dt) == "00:00"){
+    if(translateEpochTime(weatherHourly[i].dt) == "00:00"){
       return i;
     }
+  }
+}
+
+const translateEpochDay = (epoch) => {
+  let newDate = new Date(epoch * 1000);
+  switch (newDate.getDay()) {
+    case 1:
+      return "Monday";
+      break;
+    case 2:
+      return "Tuesday";
+      break;
+    case 3:
+      return "Wednesday";
+      break;
+    case 4:
+      return "Thursday";
+      break;
+    case 5:
+      return "Friday";
+      break;
+    case 6:
+      return "Saturday";
+      break;
+    case 0:
+      return "Sunday";
+      break;
+    default:
+      return "error";
+      break;
   }
 }
 const switchTemp = (temp, cOrF) => {
@@ -93,11 +123,11 @@ function App() {
       city = weather.timezone.slice(7);
       currentWeather = weather.current.weather[0].description;
       currentTemp = weather.current.temp;
-      sunrise = translateEpoch(weather.current.sunrise);
-      sunset = translateEpoch(weather.current.sunset);
+      sunrise = translateEpochTime(weather.current.sunrise);
+      sunset = translateEpochTime(weather.current.sunset);
       currentWind = weather.current.wind_speed;
       currentHumidity = weather.current.humidity;
-      daily = weather.daily.slice(0,5);
+      daily = weather.daily.slice(1,5);
       if(weather.current.rain){
         rain = weather.current.rain
       }
@@ -127,7 +157,9 @@ function App() {
       <div className="daily">
         {daily.map && daily.map(day => (
           <div className="dailyContainer">
-              {day.weather[0].main}
+            <p className="dayData">{translateEpochDay(day.dt)}</p>
+            <p className="dayData">{day.weather[0].main}</p>
+            {day.temp.max} / {day.temp.min}
           </div>
           ))}
           
@@ -142,7 +174,7 @@ function App() {
           <tbody>
             {hourly.map && hourly.map(hour => (
             <tr>
-              <td className="hourData">{translateEpoch(hour.dt)}</td>
+              <td className="hourData">{translateEpochTime(hour.dt)}</td>
               <td className="hourData">{hour.temp} C</td>
               <td className="hourData">{hour.weather[0].description}</td>
               <td className="hourData">{hour.wind_speed}m/s</td>
