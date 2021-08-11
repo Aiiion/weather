@@ -115,7 +115,8 @@ function App() {
       <div className="subHeader">
         <p className="headerData">wind {currentWind}m/s</p>
         <p className="headerData">{currentHumidity}% humidity</p>
-        <p className="headerData">sunrise at {sunrise} | sunset at {sunset}</p>
+        <p className="headerData">sunrise at {sunrise}</p>
+        <p className="headerData">sunset at {sunset}</p>
       </div>
       <div className="hourly">
          <table>
