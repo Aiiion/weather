@@ -9,6 +9,8 @@ let currentWeather = null;
 let currentTemp = null;
 let sunrise = null;
 let sunset = null;
+let currentWind = null;
+let currentHumidity = null;
 
 const createApiUrl = ({lat, lng}) => {
   
@@ -68,8 +70,8 @@ const trimHoursAt = (weatherHourly) =>{ //detects when the array is at a new day
 const switchTemp = (temp, cOrF) => {
   if(cOrF == "C"){
   let subtractedTemp = temp-32
-  let test = subtractedTemp/1.8;
-  return subtractedTemp
+  
+  return subtractedTemp/1.8
   }else{
     let miltiTemp = temp*1.8
     return miltiTemp+32
@@ -91,6 +93,8 @@ function App() {
       currentTemp = weather.current.temp;
       sunrise = translateEpoch(weather.current.sunrise);
       sunset = translateEpoch(weather.current.sunset);
+      currentWind = weather.current.wind_speed;
+      currentHumidity = weather.current.humidity;
       setHourly(weather.hourly.slice(0,trimHoursAt(weather.hourly)));
       // trimHoursAt(weather.hourly).then((value) => {
       //   setHourly(weather.hourly.slice(0,value))
@@ -99,31 +103,35 @@ function App() {
       city = "error, could not get weather data"
     } 
   }, [weather])
-  console.log(switchTemp(currentTemp));
+  console.log(hourly)
   return (
     
     <div className="App">
       <header className="App-header">
-        <h1>{city}</h1>
-        <h3>{currentWeather}</h3>
-        <p>{currentTemp}C</p>
-        <p>sunrise at {sunrise} | sunset at {sunset}</p>
+        <h1 className="headerData">{city}</h1>
+        <h3 className="headerData">{currentTemp}C </h3>
+        <h3 className="headerData">{currentWeather}</h3>
       </header>
+      <div className="subHeader">
+        <p className="headerData">wind {currentWind}m/s</p>
+        <p className="headerData">{currentHumidity}% humidity</p>
+        <p className="headerData">sunrise at {sunrise} | sunset at {sunset}</p>
+      </div>
       <div className="hourly">
          <table>
-           <th>Time</th>
-           <th>Temprature</th>
-           <th>Weather</th>
-           <th>Wind</th>
-           <th>Humidity</th>
+           <th className="hourData">Time</th>
+           <th className="hourData">Temprature</th>
+           <th className="hourData">Weather</th>
+           <th className="hourData">Wind</th>
+           <th className="hourData">Humidity</th>
 
           {hourly.map && hourly.map(hour => (
            <tr>
-             <td>{translateEpoch(hour.dt)}</td>
-             <td>{hour.temp} C</td>
-             <td>{hour.weather[0].description}</td>
-             <td>{hour.wind_speed}m/s</td>
-             <td>{hour.humidity}</td>
+             <td className="hourData">{translateEpoch(hour.dt)}</td>
+             <td className="hourData">{hour.temp} C</td>
+             <td className="hourData">{hour.weather[0].description}</td>
+             <td className="hourData">{hour.wind_speed}m/s</td>
+             <td className="hourData">{hour.humidity}</td>
            </tr>
            
           ))}

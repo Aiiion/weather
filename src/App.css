@@ -10,13 +10,17 @@ body{
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: space-evenly;
   font-size: calc(10px + 2vmin);
-color:white;
+  color:white;
+  
 }
 
 table{
-  border: 1px solid white;
+  /* border: 1px solid white; */
+}
+.hourData{
+  padding: 0.3vw;
 }
 .App-logo {
   height: 40vmin;
@@ -31,15 +35,27 @@ table{
 
 .App-header {
   
-  /* min-height: 100vh; */
+   min-height: 20vh;
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  
+  align-items: flex-start;
+  justify-content: space-evenly; 
   font-size: calc(10px + 2vmin);
   color: white;
+  
 }
-
+.headerData{
+  margin-top: 5vh;
+  margin-bottom: 5vh;
+  padding-top:1px;  
+}
+.subHeader{
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-evenly;
+  border-bottom: 2px solid white;
+  font-size: calc(10px + 2vmin);
+}
 .App-link {
   color: #61dafb;
 }
