@@ -12,6 +12,7 @@ let sunset = null;
 let currentWind = null;
 let currentHumidity = null;
 let rain = 0;
+let daily = {};
 
 const createApiUrl = ({lat, lng}) => {
   
@@ -96,13 +97,12 @@ function App() {
       sunset = translateEpoch(weather.current.sunset);
       currentWind = weather.current.wind_speed;
       currentHumidity = weather.current.humidity;
+      daily = weather.daily.slice(0,5);
       if(weather.current.rain){
         rain = weather.current.rain
       }
       setHourly(weather.hourly.slice(0,trimHoursAt(weather.hourly)));
-      // trimHoursAt(weather.hourly).then((value) => {
-      //   setHourly(weather.hourly.slice(0,value))
-      // })
+      
     }else{
       city = "error, could not get weather data"
     } 
@@ -124,6 +124,14 @@ function App() {
         <p className="headerData">sunrise at {sunrise}</p>
         <p className="headerData">sunset at {sunset}</p>
       </div>
+      <div className="daily">
+        {daily.map && daily.map(day => (
+          <div className="dailyContainer">
+              {day.weather[0].main}
+          </div>
+          ))}
+          
+      </div>
       <div className="hourly">
          <table>
            <th className="hourData">Time</th>
@@ -131,17 +139,18 @@ function App() {
            <th className="hourData">Weather</th>
            <th className="hourData">Wind</th>
            <th className="hourData">Humidity</th>
-
-          {hourly.map && hourly.map(hour => (
-           <tr>
-             <td className="hourData">{translateEpoch(hour.dt)}</td>
-             <td className="hourData">{hour.temp} C</td>
-             <td className="hourData">{hour.weather[0].description}</td>
-             <td className="hourData">{hour.wind_speed}m/s</td>
-             <td className="hourData">{hour.humidity}</td>
-           </tr>
-           
-          ))}
+          <tbody>
+            {hourly.map && hourly.map(hour => (
+            <tr>
+              <td className="hourData">{translateEpoch(hour.dt)}</td>
+              <td className="hourData">{hour.temp} C</td>
+              <td className="hourData">{hour.weather[0].description}</td>
+              <td className="hourData">{hour.wind_speed}m/s</td>
+              <td className="hourData">{hour.humidity}</td>
+            </tr>
+            
+            ))}
+          </tbody>
         </table> 
       </div>
       <View getWeatherData={getWeatherData}/>
