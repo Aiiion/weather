@@ -11,6 +11,7 @@ let sunrise = null;
 let sunset = null;
 let currentWind = null;
 let currentHumidity = null;
+let rain = 0;
 
 const createApiUrl = ({lat, lng}) => {
   
@@ -95,6 +96,9 @@ function App() {
       sunset = translateEpoch(weather.current.sunset);
       currentWind = weather.current.wind_speed;
       currentHumidity = weather.current.humidity;
+      if(weather.current.rain){
+        rain = weather.current.rain
+      }
       setHourly(weather.hourly.slice(0,trimHoursAt(weather.hourly)));
       // trimHoursAt(weather.hourly).then((value) => {
       //   setHourly(weather.hourly.slice(0,value))
@@ -103,18 +107,19 @@ function App() {
       city = "error, could not get weather data"
     } 
   }, [weather])
-  console.log(hourly)
   return (
     
     <div className="App">
+      <h1 className="headerData">{city}</h1>
       <header className="App-header">
-        <h1 className="headerData">{city}</h1>
+        
         <h3 className="headerData">{currentTemp}C </h3>
         <h3 className="headerData">{currentWeather}</h3>
+        <p className="headerData">{rain} mm peticipation</p>
       </header>
       <div className="subHeader">
         <p className="headerData">wind {currentWind}m/s</p>
-        <p className="headerData">{currentHumidity}% humidity</p>
+        <p className="headerData">humidity {currentHumidity}%</p>
         <p className="headerData">sunrise at {sunrise}</p>
         <p className="headerData">sunset at {sunset}</p>
       </div>
