@@ -110,11 +110,12 @@ function App() {
   return (
     
     <div className="App">
-      <h1 className="headerData">{city}</h1>
+      <h1>{city} | {currentTemp}C</h1>
       <header className="App-header">
         
-        <h3 className="headerData">{currentTemp}C </h3>
+       
         <h3 className="headerData">{currentWeather}</h3>
+        <h3 className="headerData">{currentTemp}C </h3>
         <p className="headerData">{rain} mm peticipation</p>
       </header>
       <div className="subHeader">
