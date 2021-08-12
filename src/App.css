@@ -21,7 +21,7 @@ button{
   border:1px solid white;
   background-color: #282c34;
   color:white;
-  border-radius: 5px;;
+  border-radius: 5px;
 }
 .topContainer{
   background-color: #22252c ;
@@ -39,11 +39,6 @@ table{
   pointer-events: none;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
 h1{
   margin:0px;
   padding:1vh;
@@ -76,11 +71,8 @@ h1{
   border-bottom: 2px solid white;
   font-size: calc(10px + 2vmin);
   background-color: #282c34;
-  /* background-image: linear-gradient(180deg, #282c34, #22252c); */
 }
 .daily{
-  
-  /* background-image: linear-gradient(180deg, #22252c, #282c34); */
   margin:0px;
 
 }
@@ -105,11 +97,3 @@ h1{
   color: #61dafb;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}

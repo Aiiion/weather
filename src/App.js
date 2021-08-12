@@ -96,15 +96,6 @@ const translateEpochDay = (epoch) => {//translated the epoch value to the weekda
       return "error";
   }
 }
-const calcTemp = (temp) => { //calculates the temprature when measurement is switched
-  if(measure == "°C"){
-    let subtractedTemp = temp-32
-    return subtractedTemp/1.8
-  }else{
-     let multiTemp = temp*1.8
-     return multiTemp+32;
-  }
-}
 
 function App() {
   const [weather, setWeather] = useState({});
