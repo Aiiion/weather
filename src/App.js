@@ -14,10 +14,14 @@ let currentHumidity = null;
 let rain = 0;
 let daily = {};
 let measure = "°C";
+let distanceTime ="m/s";
 
 const createApiUrl = ({lat, lng}) => {
-  
+  if(measure == "°C"){
   return `${API_BASE_URL}lat=${lat}&lon=${lng}&exclude=minutely&units=metric&appid=${WEATHER_API_KEY}`
+  }else{
+    return `${API_BASE_URL}lat=${lat}&lon=${lng}&exclude=minutely&units=imperial&appid=${WEATHER_API_KEY}`
+  }
 }
 
 const getLatLng = () => {
@@ -71,7 +75,7 @@ const trimHoursAt = (weatherHourly) =>{ //detects when the array is at a new day
   }
 }
 
-const translateEpochDay = (epoch) => {
+const translateEpochDay = (epoch) => {//translated the epoch value to the weekday of the date
   let newDate = new Date(epoch * 1000);
   switch (newDate.getDay()) {
     case 1:
@@ -92,32 +96,19 @@ const translateEpochDay = (epoch) => {
       return "error";
   }
 }
-const calcTemp = (temp) => {
-  if(measure == "°F"){
-  let subtractedTemp = temp-32
-  
-  return subtractedTemp/1.8
+const calcTemp = (temp) => { //calculates the temprature when measurement is switched
+  if(measure == "°C"){
+    let subtractedTemp = temp-32
+    return subtractedTemp/1.8
   }else{
      let multiTemp = temp*1.8
-     return multiTemp+32
-    
+     return multiTemp+32;
   }
-}
-const switchTemp = () => {
-  if(measure == "°F"){
-    measure = "°C";
-  }else{
-    measure = "°F";
-  }
-  calcTemp(currentTemp)
-  console.log("switched temp")
 }
 
 function App() {
   const [weather, setWeather] = useState({});
   const [hourly, setHourly] = useState({});
-  
-  console.log(weather)
 
   useEffect(() => {
     getWeatherData(setWeather)
@@ -127,7 +118,7 @@ function App() {
     if(weather.timezone){ 
       city = weather.timezone.slice(7);
       currentWeather = weather.current.weather[0].description;
-      currentTemp = weather.current.temp;
+      currentTemp = Math.floor(weather.current.temp);
       sunrise = translateEpochTime(weather.current.sunrise);
       sunset = translateEpochTime(weather.current.sunset);
       currentWind = weather.current.wind_speed;
@@ -142,22 +133,33 @@ function App() {
       city = "error, could not get weather data"
     } 
   }, [weather])
+  const switchTemp = () => {
+    if(measure == "°F"){
+      measure = "°C";
+      distanceTime = "m/s"
+    }else{
+      measure = "°F";
+      distanceTime ="mph"
+    }
+    getWeatherData(setWeather);
+  }
+
   return (
     
     <div className="App">
-      <h1>{city}</h1>
-      {/* <button onClick={switchTemp()}>
-        Switch from {measure}
-      </button> */}
+      <div className="topContainer">
+        <h1>{city}</h1>
+        <button onClick={() => {switchTemp()}}>
+          Switch Units
+        </button>
+      </div>
       <header className="App-header">
-        
-       
         <h3 className="headerData">{currentWeather}</h3>
         <h3 className="headerData">{currentTemp}{measure}</h3>
-        <h3 className="headerData">{rain} mm rain</h3>
+        <h3 className="headerData">{rain}mm rain</h3>
       </header>
       <div className="subHeader">
-        <p className="headerData">wind {currentWind}m/s</p>
+        <p className="headerData">wind {currentWind}{distanceTime}</p>
         <p className="headerData">humidity {currentHumidity}%</p>
         <p className="headerData">sunrise at {sunrise}</p>
         <p className="headerData">sunset at {sunset}</p>
@@ -173,6 +175,7 @@ function App() {
                 <p className="dayData">{Math.floor(day.temp.max)}{measure} / {Math.floor(day.temp.min)}{measure}</p>
               </div>
               ))}
+              
           </div>
       </div>
       <div className="hourly">
@@ -187,9 +190,9 @@ function App() {
             {hourly.map && hourly.map(hour => (
             <tr>
               <td className="hourData">{translateEpochTime(hour.dt)}</td>
-              <td className="hourData">{hour.temp}{measure}</td>
+              <td className="hourData">{Math.floor(hour.temp)}{measure}</td>
               <td className="hourData">{hour.weather[0].description}</td>
-              <td className="hourData">{hour.wind_speed}m/s</td>
+              <td className="hourData">{hour.wind_speed}{distanceTime}</td>
               <td className="hourData">{hour.humidity}%</td>
             </tr>
             

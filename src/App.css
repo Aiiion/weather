@@ -15,7 +15,17 @@ body{
   color:white;
   
 }
-
+button{
+  font-size: calc(8px + 1vmin);
+  -webkit-font-smoothing: antialiased;
+  border:1px solid white;
+  background-color: #282c34;
+  color:white;
+  border-radius: 5px;;
+}
+.topContainer{
+  background-color: #22252c ;
+}
 table{
   background-color: #22252c;
   padding:2vw;
