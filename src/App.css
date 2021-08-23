@@ -92,6 +92,7 @@ h1{
   border-radius: 5px;
   padding:2vw;
   background-color: #22252c;
+  /* max-width:16vw; */
 }
 .App-link {
   color: #61dafb;

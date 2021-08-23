@@ -2,7 +2,6 @@ import './App.css';
 import View from './View.js';
 import React, { useEffect, useState } from 'react';
 
-const WEATHER_API_KEY = '7388dea722ff797c2e08d78452e08901';
 const API_BASE_URL = `https://api.openweathermap.org/data/2.5/onecall?`
 let city = null;
 let currentWeather = null;
@@ -18,9 +17,9 @@ let distanceTime ="m/s";
 
 const createApiUrl = ({lat, lng}) => {
   if(measure == "°C"){
-  return `${API_BASE_URL}lat=${lat}&lon=${lng}&exclude=minutely&units=metric&appid=${WEATHER_API_KEY}`
+  return `${API_BASE_URL}lat=${lat}&lon=${lng}&exclude=minutely&units=metric&appid=${process.env.REACT_APP_API_KEY}`
   }else{
-    return `${API_BASE_URL}lat=${lat}&lon=${lng}&exclude=minutely&units=imperial&appid=${WEATHER_API_KEY}`
+    return `${API_BASE_URL}lat=${lat}&lon=${lng}&exclude=minutely&units=imperial&appid=${process.env.REACT_APP_API_KEY}`
   }
 }
 
