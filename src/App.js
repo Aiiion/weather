@@ -66,36 +66,31 @@ const translateEpochTime = (epoch) =>{ //translates the epoch value to time in h
   return `${hour}:${minute}`;
 }
 
-const trimHoursAt = (weatherHourly) =>{ //detects when the array is at a new day and returns thats value 
-  for (let i = 0; i < 23; i++) {
-    if(translateEpochTime(weatherHourly[i].dt) == "00:00"){
-      return i;
-    }
-  }
-}
-
 const translateEpochDay = (epoch) => {//translated the epoch value to the weekday of the date
   let newDate = new Date(epoch * 1000);
+  
   switch (newDate.getDay()) {
     case 1:
-      return "Monday";
+      return trimIfPhone("Monday");
     case 2:
-      return "Tuesday";
+      return trimIfPhone("Tuesday");
     case 3:
-      return "Wednesday";
+      return trimIfPhone("Wednesday");
     case 4:
-      return "Thursday";
+      return trimIfPhone("Thursday");
     case 5:
-      return "Friday";
+      return trimIfPhone("Friday");
     case 6:
-      return "Saturday";
+      return trimIfPhone("Saturday");
     case 0:
-      return "Sunday";
+      return trimIfPhone("Sunday");
     default:
-      return "error";
+      return trimIfPhone("error");
   }
 }
-
+const trimIfPhone = (str) => {
+  return window.innerWidth > 768 ? str : str.trim(0, 3);
+}
 function App() {
   const [weather, setWeather] = useState({});
   const [hourly, setHourly] = useState({});
@@ -117,7 +112,7 @@ function App() {
       if(weather.current.rain){
         rain = weather.current.rain
       }
-      setHourly(weather.hourly.slice(0,trimHoursAt(weather.hourly)));
+      setHourly(weather.hourly.slice(0, 12));
       
     }else{
       city = "error, could not get weather data"
@@ -169,13 +164,17 @@ function App() {
           </div>
       </div>
       <div className="hourly">
-        <h3 className="headerData">Later today</h3>
+        <h3 className="headerData">The coming 12 hours</h3>
          <table>
-           <th className="hourData">Time</th>
-           <th className="hourData">Temprature</th>
-           <th className="hourData">Weather</th>
-           <th className="hourData">Wind</th>
-           <th className="hourData">Humidity</th>
+           <thead>
+             <tr>
+              <th className="hourData">Time</th>
+              <th className="hourData">Temprature</th>
+              <th className="hourData">Weather</th>
+              <th className="hourData">Wind</th>
+              <th className="hourData">Humidity</th>
+            </tr>
+           </thead>
           <tbody>
             {hourly.map && hourly.map(hour => (
             <tr>
