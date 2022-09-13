@@ -89,7 +89,7 @@ const translateEpochDay = (epoch) => {//translated the epoch value to the weekda
   }
 }
 const trimIfPhone = (str) => {
-  return window.innerWidth > 768 ? str : str.trim(0, 3);
+  return window.innerWidth > 768 ? str : str.slice(0, 3);
 }
 function App() {
   const [weather, setWeather] = useState({});
