@@ -1,6 +1,7 @@
 import './App.css';
 import View from './View.jsx';
-import React, { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
+import { translateEpochDay } from './helpers.js';
 
 const API_BASE_URL = `https://api.alexbierhance.com/weather?`
 let city = null;
@@ -64,33 +65,6 @@ const translateEpochTime = (epoch) =>{ //translates the epoch value to time in h
   }
   return `${hour}:${minute}`;
 }
-
-const translateEpochDay = (epoch) => {//translated the epoch value to the weekday of the date
-  let newDate = new Date(epoch * 1000);
-  
-  switch (newDate.getDay()) {
-    case 1:
-      return "Monday";
-    case 2:
-      return "Tuesday";
-    case 3:
-      return "Wednesday";
-    case 4:
-      return "Thursday";
-    case 5:
-      return "Friday";
-    case 6:
-      return "Saturday";
-    case 0:
-      return "Sunday";
-    default:
-      return "error";
-  }
-}
-const trimIfPhone = (str) => {
-  return window.innerWidth > 768 ? str : str.slice(0, 3);
-}
-
 
 function App() {
   const [weather, setWeather] = useState({});
