@@ -1,7 +1,7 @@
 import './App.css';
 import View from './View.jsx';
 import { useEffect, useState } from 'react';
-import { translateEpochDay } from './helpers.js';
+import { translateEpochTime, translateEpochDay } from './helpers.js';
 
 const API_BASE_URL = `https://api.alexbierhance.com/weather?`
 let city = null;
@@ -53,18 +53,6 @@ const getWeatherData= (setWeather) =>
   .then(fetch)
   .then(toJSON)
   .then((res) => setWeather(res.data));
-
-const translateEpochTime = (epoch) =>{ //translates the epoch value to time in hours and minutes
-  let date = new Date(epoch * 1000); 
-  let hour = date.getHours();
-  let minute = date.getMinutes();
-  if(minute < 10){
-    minute = `0${minute}`
-  }if(hour < 10){
-    hour = `0${hour}`
-  }
-  return `${hour}:${minute}`;
-}
 
 function App() {
   const [weather, setWeather] = useState({});
