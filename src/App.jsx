@@ -154,44 +154,46 @@ function App() {
       </div> */}
       <div className="hourly">
         <h3 className="headerData">Upcoming weather</h3>
-        {forecast.map &&
-          forecast.map((forecastData, idx) => (
-            <div key={idx}>
-              <h4>{translateEpochDay(forecastData[0].dt)}</h4>
-              <table>
-                <thead>
-                  <tr>
-                    <th className="hourData">DateTime</th>
-                    <th className="hourData">Temp</th>
-                    <th className="hourData">Weather</th>
-                    <th className="hourData">Wind</th>
-                    <th className="hourData">Humidity</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {forecastData.map((hour) => (
-                    <tr key={hour.dt}>
-                      <td className="hourData">
-                        {translateEpochTime(hour.dt)}
-                      </td>
-                      <td className="hourData">
-                        {Math.floor(hour.main.temp)}
-                        {measure}
-                      </td>
-                      <td className="hourData">
-                        {hour.weather[0].description}
-                      </td>
-                      <td className="hourData">
-                        {Math.floor(hour.wind.speed)}
-                        {distanceTime}
-                      </td>
-                      <td className="hourData">{hour.main.humidity}%</td>
+        <div className="forecastContainer">
+          {forecast.map &&
+            forecast.map((forecastData, idx) => (
+              <div className="dayContainer" key={idx}>
+                <h4>{translateEpochDay(forecastData[0].dt)}</h4>
+                <table>
+                  <thead>
+                    <tr>
+                      <th className="hourData">Time</th>
+                      <th className="hourData">Temp</th>
+                      <th className="hourData">Weather</th>
+                      <th className="hourData">Wind</th>
+                      <th className="hourData">Humidity</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ))}
+                  </thead>
+                  <tbody>
+                    {forecastData.map((hour) => (
+                      <tr key={hour.dt}>
+                        <td className="hourData">
+                          {translateEpochTime(hour.dt)}
+                        </td>
+                        <td className="hourData">
+                          {Math.floor(hour.main.temp)}
+                          {measure}
+                        </td>
+                        <td className="hourData">
+                          {hour.weather[0].description}
+                        </td>
+                        <td className="hourData">
+                          {Math.floor(hour.wind.speed)}
+                          {distanceTime}
+                        </td>
+                        <td className="hourData">{hour.main.humidity}%</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ))}
+        </div>
       </div>
       <View getWeatherData={getWeatherData} />
     </div>

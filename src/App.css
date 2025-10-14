@@ -15,6 +15,15 @@ body{
   color:white;
   
 }
+.forecastContainer{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.dayContainer{
+  width:100%;
+}
+
 button{
   font-size: calc(8px + 1vmin);
   -webkit-font-smoothing: antialiased;
@@ -30,6 +39,7 @@ table{
   background-color: #22252c;
   padding:2vw;
   border-radius: 5px;
+  width:100%;
 }
 .hourData{
   padding: 0.3vw;
@@ -48,6 +58,7 @@ h1{
   justify-content: center;
   background-color: #22252c;
 }
+
 .App-header {
   min-height: 15vh;
   display: flex;
@@ -87,13 +98,7 @@ h1{
   margin-top:1vh;
   margin-bottom: 1vh;
 }
-.dayContainer{
-  border:1px solid white;
-  border-radius: 5px;
-  padding:2vw;
-  background-color: #22252c;
-  /* max-width:16vw; */
-}
+
 .App-link {
   color: #61dafb;
 }
