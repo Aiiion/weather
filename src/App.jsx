@@ -1,6 +1,6 @@
 import './App.css';
 import View from './View.jsx';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 const API_BASE_URL = `https://api.alexbierhance.com/weather?`
 let city = null;
@@ -11,7 +11,6 @@ let sunset = null;
 let currentWind = null;
 let currentHumidity = null;
 let rain = 0;
-let daily = {};
 let measure = "°C";
 let distanceTime ="m/s";
 
@@ -71,33 +70,35 @@ const translateEpochDay = (epoch) => {//translated the epoch value to the weekda
   
   switch (newDate.getDay()) {
     case 1:
-      return trimIfPhone("Monday");
+      return "Monday";
     case 2:
-      return trimIfPhone("Tuesday");
+      return "Tuesday";
     case 3:
-      return trimIfPhone("Wednesday");
+      return "Wednesday";
     case 4:
-      return trimIfPhone("Thursday");
+      return "Thursday";
     case 5:
-      return trimIfPhone("Friday");
+      return "Friday";
     case 6:
-      return trimIfPhone("Saturday");
+      return "Saturday";
     case 0:
-      return trimIfPhone("Sunday");
+      return "Sunday";
     default:
-      return trimIfPhone("error");
+      return "error";
   }
 }
 const trimIfPhone = (str) => {
   return window.innerWidth > 768 ? str : str.slice(0, 3);
 }
+
+
 function App() {
   const [weather, setWeather] = useState({});
-  const [hourly, setHourly] = useState({});
+  const [forecast, setForcast] = useState([]);
 
   useEffect(() => {
     getWeatherData(setWeather)
-  }, [getWeatherData])
+  }, [])
 
   useEffect(() => {
     console.log("Weather data updated:", weather);
@@ -109,17 +110,57 @@ function App() {
       sunset = translateEpochTime(weather.current.sys.sunset);
       currentWind = weather.current.wind.speed;
       currentHumidity = weather.current.main.humidity;
-      // daily = weather.forecast.list.slice(1,6);
-      daily = [];
       if(weather.current.rain){
         rain = weather.current.rain
       }
-      setHourly(weather.forecast.list.slice(0, 12));
-      
+      const upcoming = {};
+      const forcastData = weather.forecast.list;
+      console.log(forcastData.length)
+      for(let i = 0; i < forcastData.length; i++){
+        const day = translateEpochDay(weather.forecast.list[i].dt);
+        if(!upcoming[day]){
+          upcoming[day] = [];
+        }
+        upcoming[day].push(weather.forecast.list[i]);
+      }
+
+      setForcast(Object.values(upcoming));
+      console.log(Object.values(upcoming))
     }else{
       city = "error, could not get weather data"
     } 
   }, [weather])
+function forecastUI() {
+  return forecast.map && forecast.map((forecastData, idx) => (
+    <div key={idx}>
+      <table>
+        {/* {day} */}
+        <thead>
+          <tr>
+            <th className="hourData">DateTime</th>
+            <th className="hourData">Temp</th>
+            <th className="hourData">Weather</th>
+            <th className="hourData">Wind</th>
+            <th className="hourData">Humidity</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+          {forecastData.map(hour => (
+            <tr key={hour.dt}>
+              <td className="hourData">{translateEpochTime(hour.dt)}</td>
+              <td className="hourData">{Math.floor(hour.main.temp)}{measure}</td>
+              <td className="hourData">{hour.weather[0].description}</td>
+              <td className="hourData">{Math.floor(hour.wind.speed)}{distanceTime}</td>
+              <td className="hourData">{hour.main.humidity}%</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  ));
+}
+
   const switchTemp = () => {
     if(measure == "°F"){
       measure = "°C";
@@ -167,29 +208,7 @@ function App() {
       </div> */}
       <div className="hourly">
         <h3 className="headerData">Upcoming weather</h3>
-         <table>
-           <thead>
-             <tr>
-              <th className="hourData">DateTime</th>
-              <th className="hourData">Temp</th>
-              <th className="hourData">Weather</th>
-              <th className="hourData">Wind</th>
-              <th className="hourData">Humidity</th>
-            </tr>
-           </thead>
-          <tbody>
-            {hourly.map && hourly.map(hour => (
-            <tr>
-              <td className="hourData">{translateEpochDay(hour.dt)} {translateEpochTime(hour.dt)}</td>
-              <td className="hourData">{Math.floor(hour.main.temp)}{measure}</td>
-              <td className="hourData">{hour.weather[0].description}</td>
-              <td className="hourData">{Math.floor(hour.wind.speed)}{distanceTime}</td>
-              <td className="hourData">{hour.main.humidity}%</td>
-            </tr>
-            
-            ))}
-          </tbody>
-        </table> 
+        {forecastUI()}
       </div>
       <View getWeatherData={getWeatherData}/>
       
