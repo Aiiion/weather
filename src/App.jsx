@@ -17,9 +17,9 @@ let distanceTime ="m/s";
 
 const createApiUrl = ({lat, lng}) => {
   if(measure == "°C"){
-  return `${API_BASE_URL}lat=${lat}&lon=${lng}&exclude=minutely&units=metric`
+  return `${API_BASE_URL}lat=${lat}&lon=${lng}&units=metric`
   }else{
-    return `${API_BASE_URL}lat=${lat}&lon=${lng}&exclude=minutely&units=imperial`
+    return `${API_BASE_URL}lat=${lat}&lon=${lng}&units=imperial`
   }
 }
 
@@ -40,7 +40,7 @@ const testFunction = () => {
   try {
     getLatLng().then(({lat, lng}) => console.log('Coordinates:', {lat, lng}))
   } catch (error) {
-    console.log('failure')
+    console.log('could not get location')
   }
 }
   testFunction()
@@ -152,7 +152,7 @@ function App() {
         <p className="headerData">sunset at {sunset}</p>
       </div>
       
-      <div className="daily">
+      {/* <div className="daily">
         <h2 className="headline">The coming 5 days</h2>
           <div className="dailyContainer">
             {daily.map && daily.map(day => (
@@ -164,14 +164,14 @@ function App() {
               ))}
               
           </div>
-      </div>
+      </div> */}
       <div className="hourly">
-        <h3 className="headerData">The coming 12 hours</h3>
+        <h3 className="headerData">Upcoming weather</h3>
          <table>
            <thead>
              <tr>
-              <th className="hourData">Time</th>
-              <th className="hourData">Temprature</th>
+              <th className="hourData">DateTime</th>
+              <th className="hourData">Temp</th>
               <th className="hourData">Weather</th>
               <th className="hourData">Wind</th>
               <th className="hourData">Humidity</th>
@@ -180,11 +180,11 @@ function App() {
           <tbody>
             {hourly.map && hourly.map(hour => (
             <tr>
-              <td className="hourData">{translateEpochTime(hour.dt)}</td>
-              <td className="hourData">{Math.floor(hour.temp)}{measure}</td>
+              <td className="hourData">{translateEpochDay(hour.dt)} {translateEpochTime(hour.dt)}</td>
+              <td className="hourData">{Math.floor(hour.main.temp)}{measure}</td>
               <td className="hourData">{hour.weather[0].description}</td>
-              <td className="hourData">{hour.wind_speed}{distanceTime}</td>
-              <td className="hourData">{hour.humidity}%</td>
+              <td className="hourData">{Math.floor(hour.wind.speed)}{distanceTime}</td>
+              <td className="hourData">{hour.main.humidity}%</td>
             </tr>
             
             ))}
