@@ -88,7 +88,6 @@ function App() {
       setMeasure("°F");
       setDistanceTime("mph");
     }
-    getWeatherData(setWeather);
   };
 
   return (
