@@ -10,28 +10,7 @@ const createApiUrl = ({ lat, lon }, measureValue) => {
   return `${API_BASE_URL}lat=${lat}&lon=${lon}&units=${units}`;
 };
 
-const getLatLon = (setCity) => {
-  return new Promise((resolve, reject) => {
-    navigator.geolocation.getCurrentPosition((position) =>
-      resolve({
-        lat: (position.coords.latitude).toFixed(3),
-        lon: (position.coords.longitude).toFixed(3),
-      }), () => { 
-        reject("Unable to retrieve your location") 
-        setCity("Unable to retrieve your location");
-      }
-    );
-  });
-};
-
 const toJSON = (response) => response.json();
-
-const getWeatherData = (setWeather, measureValue, setCity) =>
-  getLatLon(setCity)
-    .then((coords) => createApiUrl(coords, measureValue))
-    .then(fetch)
-    .then(toJSON)
-    .then((res) => setWeather(res.data));
 
 function App() {
   const [city, setCity] = useState();
@@ -46,10 +25,41 @@ function App() {
   const [distanceTime, setDistanceTime] = useState("m/s");
   const [weather, setWeather] = useState({});
   const [forecast, setForecast] = useState([]);
+  const [coords, setCoords] = useState({});
 
   useEffect(() => {
-    getWeatherData(setWeather, measure, setCity);
+    getWeatherData(setWeather, measure);
   }, [measure]);
+
+  const getLatLon = () => {
+    if (coords.lat && coords.lon) {
+      return new Promise((resolve) => resolve(coords));
+    }
+    return new Promise((resolve, reject) => {
+      navigator.geolocation.getCurrentPosition(
+        (position) =>
+          resolve({
+            lat: position.coords.latitude.toFixed(3),
+            lon: position.coords.longitude.toFixed(3),
+          }),
+        () => {
+          reject("Unable to retrieve your location");
+          setCity("Unable to retrieve your location");
+        }
+      );
+    });
+  };
+  const cacheCoords = (coords) => {
+    setCoords(coords);
+    return coords;
+  };
+  const getWeatherData = (setWeather, measureValue) =>
+    getLatLon(setCity)
+      .then(cacheCoords)
+      .then((coords) => createApiUrl(coords, measureValue))
+      .then(fetch)
+      .then(toJSON)
+      .then((res) => setWeather(res.data));
 
   useEffect(() => {
     if (weather.current) {
@@ -121,8 +131,8 @@ function App() {
       </div>
 
       <div className="hourly">
-          <h3 className="headerData">Upcoming weather</h3>
-          <div className="forecastContainer">
+        <h3 className="headerData">Upcoming weather</h3>
+        <div className="forecastContainer">
           {forecast.map((forecastData, idx) => (
             <div className="dayContainer" key={idx}>
               <h4>{translateEpochDay(forecastData[0].dt)}</h4>
@@ -160,8 +170,8 @@ function App() {
               </table>
             </div>
           ))}
+        </div>
       </div>
-      </div>  
       <View getWeatherData={getWeatherData} />
     </div>
   );
