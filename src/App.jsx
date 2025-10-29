@@ -16,11 +16,6 @@ function App() {
   const [city, setCity] = useState();
   const [currentWeather, setCurrentWeather] = useState(null);
   const [currentTemp, setCurrentTemp] = useState(null);
-  const [sunrise, setSunrise] = useState(null);
-  const [sunset, setSunset] = useState(null);
-  const [currentWind, setCurrentWind] = useState(null);
-  const [currentHumidity, setCurrentHumidity] = useState(null);
-  const [rain, setRain] = useState(0);
   const [measure, setMeasure] = useState("°C");
   const [distanceTime, setDistanceTime] = useState("m/s");
   const [weather, setWeather] = useState({});
@@ -28,7 +23,7 @@ function App() {
   const [coords, setCoords] = useState({});
 
   useEffect(() => {
-    getWeatherData(setWeather, measure);
+    getWeatherData(measure);
   }, [measure]);
 
   const getLatLon = () => {
@@ -53,8 +48,8 @@ function App() {
     setCoords(coords);
     return coords;
   };
-  const getWeatherData = (setWeather, measureValue) =>
-    getLatLon(setCity)
+  const getWeatherData = (measureValue) =>
+    getLatLon()
       .then(cacheCoords)
       .then((coords) => createApiUrl(coords, measureValue))
       .then(fetch)
@@ -66,15 +61,8 @@ function App() {
       setCity(weather.current.name);
       setCurrentWeather(weather.current.weather[0].description);
       setCurrentTemp(Math.floor(weather.current.main.temp));
-      setSunrise(translateEpochTime(weather.current.sys.sunrise));
-      setSunset(translateEpochTime(weather.current.sys.sunset));
-      setCurrentWind(weather.current.wind.speed);
-      setCurrentHumidity(weather.current.main.humidity);
-      if (weather.current.rain) {
-        setRain(weather.current.rain);
-      } else {
-        setRain(0);
-      }
+    }
+    if (weather.forecast) {
       const upcoming = {};
       const forcastData = weather.forecast.list;
 
@@ -118,16 +106,22 @@ function App() {
           {currentTemp}
           {measure}
         </h3>
-        <h3 className="headerData">{rain}mm rain</h3>
+        <h3 className="headerData">{weather?.current?.rain ?? 0}mm rain</h3>
       </header>
       <div className="subHeader">
         <p className="headerData">
-          wind {currentWind}
+          wind {weather?.current?.wind.speed}
           {distanceTime}
         </p>
-        <p className="headerData">humidity {currentHumidity}%</p>
-        <p className="headerData">sunrise at {sunrise}</p>
-        <p className="headerData">sunset at {sunset}</p>
+        <p className="headerData">
+          humidity {weather?.current?.main.humidity}%
+        </p>
+        <p className="headerData">
+          sunrise at {translateEpochTime(weather?.current?.sys.sunrise)}
+        </p>
+        <p className="headerData">
+          sunset at {translateEpochTime(weather?.current?.sys.sunset)}
+        </p>
       </div>
 
       <div className="hourly">
