@@ -31,7 +31,7 @@ function App() {
       return;
     }
     getWeatherData(measure);
-  }, []);
+  }, [measure]);
 
   const getLatLon = () => {
     if (coords.lat && coords.lon) {
@@ -109,7 +109,6 @@ function App() {
       setMeasure("°F");
       setDistanceTime("mph");
     }
-    getWeatherData(measure);
   };
   function refresh() {
     window.location.reload();
