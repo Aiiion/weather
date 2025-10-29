@@ -48,6 +48,11 @@ function App() {
           () => {
             reject("Unable to retrieve your location");
             printNoLocationError();
+          },
+          { 
+            enableHighAccuracy: false, 
+            timeout: 45 * 1000,
+            maximumAge: 15 * 1000 
           }
         )
       );
@@ -59,7 +64,7 @@ function App() {
     });
   const printNoLocationError = () =>
     getPermissonStatus().then(() => {
-      if (permissionStatus !== "granted") setCity("Location permission denied");
+      if (permissionStatus === "denied") setCity("Location permission denied");
       else setCity("Unable to retrieve your location");
     });
 
