@@ -23,11 +23,14 @@ function App() {
   const [coords, setCoords] = useState({});
   const [geoId, setGeoId] = useState(null);
   const [error, setError] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [permissionStatus, setPermissionStatus] = useState("pending");
 
   useEffect(() => {
+    setLoading(true);
     if (!navigator.geolocation) {
       alert("Geolocation is not supported by your browser");
+      setLoading(false);
       return;
     }
     getWeatherData(measure);
@@ -81,7 +84,10 @@ function App() {
       .then(toJSON)
       .then((res) => setWeather(res.data))
       .then(() => navigator.geolocation.clearWatch(geoId))
-      .catch(() => setError(true));
+      .catch(() => {
+        setError(true)
+        setLoading(false)
+      });
   };
 
   useEffect(() => {
@@ -89,6 +95,7 @@ function App() {
       setCity(weather.current.name);
       setCurrentWeather(weather.current.weather[0].description);
       setCurrentTemp(Math.floor(weather.current.main.temp));
+      setLoading(false);
     }
     if (weather.forecast) {
       const upcoming = {};
@@ -135,34 +142,40 @@ function App() {
       </button>
     );
   };
+
+  function skeleton(className = "") {
+    return <div className={`skeleton text ${className}`}></div>;
+  }
   return (
     <div className="App">
       <div className="topContainer">
-        <h1>{city ? city : <span className="loader"></span>}</h1>
+        <h1>{!loading ? city : <span className="loader"></span>}</h1>
         {tempButton()}
       </div>
       <header className="App-header">
-        <h3 className="headerData">{currentWeather}</h3>
+        {/* <h3 className="headerData">{loading ? skeleton() : currentWeather} </h3> */}
         <h3 className="headerData">
-          {currentTemp}
-          {measure}
+          {!loading ? currentTemp + measure : skeleton('small')}
+          <br />
+          {!loading ? currentWeather : skeleton()}
         </h3>
-        <h3 className="headerData">{weather?.current?.rain ?? 0}mm rain</h3>
+        {/* <h3 className="headerData">
+          {loading ? skeleton() : `${weather?.current?.rain ?? 0} mm rain`}
+        </h3> */}
       </header>
       <div className="subHeader">
-        <p className="headerData">
-          wind {weather?.current?.wind.speed}
-          {distanceTime}
-        </p>
-        <p className="headerData">
-          humidity {weather?.current?.main.humidity}%
-        </p>
-        <p className="headerData">
-          sunrise at {translateEpochTime(weather?.current?.sys.sunrise)}
-        </p>
-        <p className="headerData">
-          sunset at {translateEpochTime(weather?.current?.sys.sunset)}
-        </p>
+        <div className="headerData">
+          {loading ? skeleton() : `wind ${weather?.current?.wind.speed}${distanceTime}`}
+        </div>
+        <div className="headerData">
+          {loading ? skeleton() : `humidity ${weather?.current?.main.humidity}%`}
+        </div>
+        <div className="headerData">
+          {loading ? skeleton() : `sunrise at ${translateEpochTime(weather?.current?.sys.sunrise)}`}
+        </div>
+        <div className="headerData">
+          {loading ? skeleton() : `sunset at ${translateEpochTime(weather?.current?.sys.sunset)}`}
+        </div>
       </div>
 
       <div className="hourly">
