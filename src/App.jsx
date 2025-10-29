@@ -21,6 +21,7 @@ function App() {
   const [weather, setWeather] = useState({});
   const [forecast, setForecast] = useState([]);
   const [coords, setCoords] = useState({});
+  const [geoId, setGeoId] = useState(null);
 
   useEffect(() => {
     getWeatherData(measure);
@@ -31,7 +32,7 @@ function App() {
       return new Promise((resolve) => resolve(coords));
     }
     return new Promise((resolve, reject) => {
-      navigator.geolocation.getCurrentPosition(
+      setGeoId(navigator.geolocation.watchPosition(
         (position) =>
           resolve({
             lat: position.coords.latitude.toFixed(3),
@@ -41,7 +42,7 @@ function App() {
           reject("Unable to retrieve your location");
           setCity("Unable to retrieve your location");
         }
-      );
+      ));
     });
   };
   const cacheCoords = (coords) => {
@@ -54,7 +55,8 @@ function App() {
       .then((coords) => createApiUrl(coords, measureValue))
       .then(fetch)
       .then(toJSON)
-      .then((res) => setWeather(res.data));
+      .then((res) => setWeather(res.data))
+      .then(() => navigator.geolocation.clearWatch(geoId));
 
   useEffect(() => {
     if (weather.current) {
