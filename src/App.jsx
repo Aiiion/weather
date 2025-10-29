@@ -22,41 +22,62 @@ function App() {
   const [forecast, setForecast] = useState([]);
   const [coords, setCoords] = useState({});
   const [geoId, setGeoId] = useState(null);
+  const [error, setError] = useState(false);
+  const [permissionStatus, setPermissionStatus] = useState("pending");
 
   useEffect(() => {
+    if (!navigator.geolocation) {
+      alert("Geolocation is not supported by your browser");
+      return;
+    }
     getWeatherData(measure);
-  }, [measure]);
+  }, []);
 
   const getLatLon = () => {
     if (coords.lat && coords.lon) {
       return new Promise((resolve) => resolve(coords));
     }
     return new Promise((resolve, reject) => {
-      setGeoId(navigator.geolocation.watchPosition(
-        (position) =>
-          resolve({
-            lat: position.coords.latitude.toFixed(3),
-            lon: position.coords.longitude.toFixed(3),
-          }),
-        () => {
-          reject("Unable to retrieve your location");
-          setCity("Unable to retrieve your location");
-        }
-      ));
+      setGeoId(
+        navigator.geolocation.watchPosition(
+          (position) =>
+            resolve({
+              lat: position.coords.latitude.toFixed(3),
+              lon: position.coords.longitude.toFixed(3),
+            }),
+          () => {
+            reject("Unable to retrieve your location");
+            printNoLocationError();
+          }
+        )
+      );
     });
   };
+  const getPermissonStatus = () =>
+    navigator.permissions.query({ name: "geolocation" }).then((permission) => {
+      setPermissionStatus(permission.state);
+    });
+  const printNoLocationError = () =>
+    getPermissonStatus().then(() => {
+      if (permissionStatus !== "granted") setCity("Location permission denied");
+      else setCity("Unable to retrieve your location");
+    });
+
   const cacheCoords = (coords) => {
     setCoords(coords);
     return coords;
   };
-  const getWeatherData = (measureValue) =>
+  const getWeatherData = (measureValue) => {
+    setCity(null);
     getLatLon()
       .then(cacheCoords)
       .then((coords) => createApiUrl(coords, measureValue))
       .then(fetch)
       .then(toJSON)
       .then((res) => setWeather(res.data))
-      .then(() => navigator.geolocation.clearWatch(geoId));
+      .then(() => navigator.geolocation.clearWatch(geoId))
+      .catch(() => setError(true));
+  };
 
   useEffect(() => {
     if (weather.current) {
@@ -88,19 +109,33 @@ function App() {
       setMeasure("°F");
       setDistanceTime("mph");
     }
+    getWeatherData(measure);
   };
+  function refresh() {
+    window.location.reload();
+  }
 
+  const tempButton = () => {
+    const func = error
+      ? permissionStatus !== "granted"
+        ? refresh
+        : getWeatherData
+      : switchTemp;
+    return (
+      <button
+        onClick={() => {
+          func();
+        }}
+      >
+        {!error ? "Switch Units" : "Retry"}
+      </button>
+    );
+  };
   return (
     <div className="App">
       <div className="topContainer">
         <h1>{city ? city : <span className="loader"></span>}</h1>
-        <button
-          onClick={() => {
-            switchTemp();
-          }}
-        >
-          Switch Units
-        </button>
+        {tempButton()}
       </div>
       <header className="App-header">
         <h3 className="headerData">{currentWeather}</h3>
