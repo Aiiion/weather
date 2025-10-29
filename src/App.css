@@ -44,10 +44,6 @@ table{
 .hourData{
   padding: 0.3vw;
 }
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
 
 h1{
   margin:0px;
@@ -87,9 +83,6 @@ h1{
   margin:0px;
 
 }
-.headline{
-  font-size: calc(10px + 3vmin);
-}
 .dailyContainer{
   display:flex;
   align-items:flex-start;
@@ -97,10 +90,6 @@ h1{
   font-size: calc(10px + 1vmin);
   margin-top:1vh;
   margin-bottom: 1vh;
-}
-
-.App-link {
-  color: #61dafb;
 }
 
 .loader {
