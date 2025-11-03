@@ -23,6 +23,7 @@ export const translateEpochDay = (epoch) => {
 };
 //translates the epoch value to time in hours and minutes
 export const translateEpochTime = (epoch) => {
+  if(!epoch) return "";
   let date = new Date(epoch * 1000);
   let hour = date.getHours();
   let minute = date.getMinutes();
