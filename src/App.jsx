@@ -14,8 +14,6 @@ const toJSON = (response) => response.json();
 
 function App() {
   const [city, setCity] = useState();
-  const [currentWeather, setCurrentWeather] = useState(null);
-  const [currentTemp, setCurrentTemp] = useState(null);
   const [measure, setMeasure] = useState("°C");
   const [distanceTime, setDistanceTime] = useState("m/s");
   const [weather, setWeather] = useState({});
@@ -82,7 +80,7 @@ function App() {
       .then((coords) => createApiUrl(coords, measureValue))
       .then(fetch)
       .then(toJSON)
-      .then((res) => setWeather(res.data))
+      .then((res) => updateData(res.data))
       .then(() => navigator.geolocation.clearWatch(geoId))
       .catch(() => {
         setError(true)
@@ -90,17 +88,16 @@ function App() {
       });
   };
 
-  useEffect(() => {
-    if (weather.currentWeather) {
-      setCity(weather.currentWeather.name);
-      setCurrentWeather(weather.currentWeather.weather[0].description);
-      setCurrentTemp(Math.floor(weather.currentWeather.main.temp));
+  const updateData = (data) => {
+    if (data.currentWeather) {
+      setWeather(data.currentWeather);
+      setCity(data.currentWeather.name);
       setLoading(false);
     }
-    if (weather.forecastWeather) {
-      setForecast(Object.values(weather.forecastWeather));
+    if (data.forecastWeather) {
+      setForecast(Object.values(data.forecastWeather));
     }
-  }, [weather]);
+  };
 
   const switchTemp = () => {
     if (measure === "°F") {
@@ -144,9 +141,9 @@ function App() {
       <header className="App-header">
         {/* <h3 className="headerData">{loading ? skeleton() : currentWeather} </h3> */}
         <h3 className="headerData">
-          {!loading ? currentTemp + measure : skeleton('small')}
+          {!loading ? Math.floor(weather.main.temp) + measure : skeleton('small')}
           <br />
-          {!loading ? currentWeather : skeleton()}
+          {!loading ? weather.weather[0].description : skeleton()}
         </h3>
         {/* <h3 className="headerData">
           {loading ? skeleton() : `${weather?.current?.rain ?? 0} mm rain`}
@@ -154,16 +151,16 @@ function App() {
       </header>
       <div className="subHeader">
         <div className="headerData">
-          {loading ? skeleton() : `wind ${weather?.currentWeather?.wind.speed}${distanceTime}`}
+          {loading ? skeleton() : `wind ${weather?.wind.speed}${distanceTime}`}
         </div>
         <div className="headerData">
-          {loading ? skeleton() : `humidity ${weather?.currentWeather?.main.humidity}%`}
+          {loading ? skeleton() : `humidity ${weather?.main.humidity}%`}
         </div>
         <div className="headerData">
-          {loading ? skeleton() : `sunrise at ${translateEpochTime(weather?.currentWeather?.sys.sunrise)}`}
+          {loading ? skeleton() : `sunrise at ${translateEpochTime(weather?.sys.sunrise)}`}
         </div>
         <div className="headerData">
-          {loading ? skeleton() : `sunset at ${translateEpochTime(weather?.currentWeather?.sys.sunset)}`}
+          {loading ? skeleton() : `sunset at ${translateEpochTime(weather?.sys.sunset)}`}
         </div>
       </div>
 
