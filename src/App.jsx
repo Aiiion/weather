@@ -3,7 +3,7 @@ import View from "./View.jsx";
 import { useEffect, useState } from "react";
 import { translateEpochTime, translateEpochDay } from "./helpers.js";
 
-const API_BASE_URL = `https://api.alexbierhance.com/weather?`;
+const API_BASE_URL = `https://api.alexbierhance.com/weather/aggregate?`;
 
 const createApiUrl = ({ lat, lon }, measureValue) => {
   const units = measureValue == "°C" ? "metric" : "imperial";
@@ -91,25 +91,14 @@ function App() {
   };
 
   useEffect(() => {
-    if (weather.current) {
-      setCity(weather.current.name);
-      setCurrentWeather(weather.current.weather[0].description);
-      setCurrentTemp(Math.floor(weather.current.main.temp));
+    if (weather.currentWeather) {
+      setCity(weather.currentWeather.name);
+      setCurrentWeather(weather.currentWeather.weather[0].description);
+      setCurrentTemp(Math.floor(weather.currentWeather.main.temp));
       setLoading(false);
     }
-    if (weather.forecast) {
-      const upcoming = {};
-      const forcastData = weather.forecast.list;
-
-      for (let i = 0; i < forcastData.length; i++) {
-        const day = translateEpochDay(weather.forecast.list[i].dt);
-        if (!upcoming[day]) {
-          upcoming[day] = [];
-        }
-        upcoming[day].push(weather.forecast.list[i]);
-      }
-
-      setForecast(Object.values(upcoming));
+    if (weather.forecastWeather) {
+      setForecast(Object.values(weather.forecastWeather));
     }
   }, [weather]);
 
@@ -165,16 +154,16 @@ function App() {
       </header>
       <div className="subHeader">
         <div className="headerData">
-          {loading ? skeleton() : `wind ${weather?.current?.wind.speed}${distanceTime}`}
+          {loading ? skeleton() : `wind ${weather?.currentWeather?.wind.speed}${distanceTime}`}
         </div>
         <div className="headerData">
-          {loading ? skeleton() : `humidity ${weather?.current?.main.humidity}%`}
+          {loading ? skeleton() : `humidity ${weather?.currentWeather?.main.humidity}%`}
         </div>
         <div className="headerData">
-          {loading ? skeleton() : `sunrise at ${translateEpochTime(weather?.current?.sys.sunrise)}`}
+          {loading ? skeleton() : `sunrise at ${translateEpochTime(weather?.currentWeather?.sys.sunrise)}`}
         </div>
         <div className="headerData">
-          {loading ? skeleton() : `sunset at ${translateEpochTime(weather?.current?.sys.sunset)}`}
+          {loading ? skeleton() : `sunset at ${translateEpochTime(weather?.currentWeather?.sys.sunset)}`}
         </div>
       </div>
 
