@@ -53,7 +53,7 @@ function App() {
           { 
             enableHighAccuracy: false, 
             timeout: 45 * 1000,
-            maximumAge: 15 * 1000 
+            maximumAge: 20 * 1000 
           }
         )
       );
