@@ -141,18 +141,31 @@ function App() {
         {tempButton()}
       </div>
       <header className="App-header">
-        <h3 className="headerData">
-          {!loading ? Math.floor(weather?.main.temp ?? 0) + measure : skeleton('small')}
-          <br />
-          {!loading ? weather?.weather[0].description : skeleton()}
-          <br />
-          <span className="smallText pt-0">{precipitation ? `${precipitation} mm/h` : ''}</span>
-        </h3>
-        {/* <span className="smallText">{" "}
-            {!loading
-              ? ` (feels like ${Math.floor(weather?.main.feels_like ?? 0)})`
-              : skeleton('small')}
-          </span> */}
+        <div className="headerData column">
+          <div className="inline-flex column">
+            <h3 className="m-0">
+              {!loading
+                ? Math.floor(weather?.main.temp ?? 0) + measure
+                : skeleton("small")}
+            </h3>
+            <br />
+            <span className="smallText mt-n3">
+              {!loading
+                ? ` (feels like ${Math.floor(weather?.main.feels_like ?? 0)})`
+                : skeleton("small")}
+            </span>
+          </div>
+
+          <div className="inline-flex column">
+            <h3 className="m-0">
+              {!loading ? weather?.weather[0].description : skeleton()}
+            </h3>
+
+            <span className="smallText pt-0">
+              {precipitation ? `${precipitation} mm/h` : ""}
+            </span>
+          </div>
+        </div>
       </header>
       <div className="subHeader">
         <div className="headerData">
@@ -162,10 +175,14 @@ function App() {
           {loading ? skeleton() : `humidity ${weather?.main.humidity}%`}
         </div>
         <div className="headerData">
-          {loading ? skeleton() : `sunrise at ${translateEpochTime(weather?.sys.sunrise)}`}
+          {loading
+            ? skeleton()
+            : `sunrise at ${translateEpochTime(weather?.sys.sunrise)}`}
         </div>
         <div className="headerData">
-          {loading ? skeleton() : `sunset at ${translateEpochTime(weather?.sys.sunset)}`}
+          {loading
+            ? skeleton()
+            : `sunset at ${translateEpochTime(weather?.sys.sunset)}`}
         </div>
       </div>
 
@@ -201,7 +218,13 @@ function App() {
                         {translateEpochTime(hour.dt)}
                       </td>
                       <td className="hourData">
-                        {Math.floor(hour.main.temp)}
+                        <div className="ps-3 flex">
+                          <span className="">{Math.floor(hour.main.temp)}</span>
+                          <span className="smallText" title="feels like">
+                            {" "}
+                            ({Math.floor(hour.main.feels_like)})
+                          </span>
+                        </div>
                       </td>
                       <td className="hourData">
                         {hour.weather[0].description}
@@ -211,7 +234,7 @@ function App() {
                       </td>
                       <td className="hourData">{hour.main.humidity}</td>
                       <td className="hourData">
-                        {hour.rain?.["1h"] ?? hour.snow?.["1h"] ?? 0} 
+                        {hour.rain?.["1h"] ?? hour.snow?.["1h"] ?? 0}
                       </td>
                     </tr>
                   ))}

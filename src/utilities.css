@@ -4,11 +4,20 @@
 .justify-self-start{
   justify-self: start;
 }
+.justify-content-between{
+  justify-content: space-between;
+}
+.justify-conetnt-around{
+  justify-content: space-around;
+}
 .flex{
   display: flex;
 }
 .inline-flex{
   display: inline-flex;
+}
+.column{
+  flex-direction: column;
 }
 .pt-0{
   padding-top:0px;
@@ -16,8 +25,17 @@
 .ps-1{
   padding-left: .3vw;
 }
+.ps-2{
+  padding-left: .6vw;
+}
+.ps-3{
+  padding-left: .9vw;
+}
 .m-0{
   margin:0px;
+}
+.mt-n3{
+  margin-top:-.9vw;
 }
 .w-100{
   width:100%;
