@@ -148,7 +148,6 @@ function App() {
                 ? Math.floor(weather?.main.temp ?? 0) + measure
                 : skeleton("small")}
             </h3>
-            <br />
             <span className="smallText mt-n3">
               {!loading
                 ? ` (feels like ${Math.floor(weather?.main.feels_like ?? 0)})`
