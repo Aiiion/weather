@@ -23,6 +23,7 @@ function App() {
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(true);
   const [permissionStatus, setPermissionStatus] = useState("pending");
+  const [precipitation, setPrecipitation] = useState(0);
 
   useEffect(() => {
     setLoading(true);
@@ -93,6 +94,7 @@ function App() {
       setWeather(data.currentWeather);
       setCity(data.currentWeather.name);
       setLoading(false);
+      setPrecipitation(data.currentWeather?.rain?.["1h"] ?? data.currentWeather?.snow["1h"] ?? 0);
     }
     if (data.forecastWeather) {
       setForecast(Object.values(data.forecastWeather));
@@ -139,15 +141,14 @@ function App() {
         {tempButton()}
       </div>
       <header className="App-header">
-        {/* <h3 className="headerData">{loading ? skeleton() : currentWeather} </h3> */}
         <h3 className="headerData">
           {!loading ? Math.floor(weather?.main.temp ?? 0) + measure : skeleton('small')}
           <br />
           {!loading ? weather?.weather[0].description : skeleton()}
+          <br />
+          <span className="smallText pt-0">{precipitation ? `${precipitation} mm/h` : ''}</span>
         </h3>
-        {/* <h3 className="headerData">
-          {loading ? skeleton() : `${weather?.current?.rain ?? 0} mm rain`}
-        </h3> */}
+        
       </header>
       <div className="subHeader">
         <div className="headerData">
@@ -174,10 +175,19 @@ function App() {
                 <thead>
                   <tr>
                     <th className="hourData">Time</th>
-                    <th className="hourData">Temp</th>
+                    <th className="hourData">Temp.</th>
                     <th className="hourData">Weather</th>
                     <th className="hourData">Wind</th>
-                    <th className="hourData">Humidity</th>
+                    <th className="hourData">Hm.</th>
+                    <th className="hourData">Prec.</th>
+                  </tr>
+                  <tr>
+                    <td className="pt-0 smallText"></td>
+                    <td className="pt-0 smallText">({measure})</td>
+                    <td className="pt-0 smallText"></td>
+                    <td className="pt-0 smallText">({distanceTime})</td>
+                    <td className="pt-0 smallText">(%)</td>
+                    <td className="pt-0 smallText">(mm/h)</td>
                   </tr>
                 </thead>
                 <tbody>
@@ -188,16 +198,17 @@ function App() {
                       </td>
                       <td className="hourData">
                         {Math.floor(hour.main.temp)}
-                        {measure}
                       </td>
                       <td className="hourData">
                         {hour.weather[0].description}
                       </td>
                       <td className="hourData">
                         {Math.floor(hour.wind.speed)}
-                        {distanceTime}
                       </td>
-                      <td className="hourData">{hour.main.humidity}%</td>
+                      <td className="hourData">{hour.main.humidity}</td>
+                      <td className="hourData">
+                        {hour.rain?.["1h"] ?? hour.snow?.["1h"] ?? 0} 
+                      </td>
                     </tr>
                   ))}
                 </tbody>

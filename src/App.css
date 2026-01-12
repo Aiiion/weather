@@ -15,6 +15,9 @@ body{
   color:white;
   
 }
+.smallText{
+  font-size: calc(8px + 1vmin);
+}
 .forecastContainer{
   display: flex;
   flex-direction: column;
@@ -43,6 +46,7 @@ table{
 }
 .hourData{
   padding: 0.3vw;
+  padding-bottom: 0px;;
 }
 
 h1{
@@ -83,7 +87,9 @@ h1{
 }
 .daily{
   margin:0px;
-
+}
+.pt-0{
+  padding-top:0px;
 }
 .dailyContainer{
   display:flex;
