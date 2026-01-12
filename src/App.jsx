@@ -203,12 +203,12 @@ function App() {
                     <th className="hourData">Prec.</th>
                   </tr>
                   <tr>
-                    <td className="pt-0 smallText"></td>
-                    <td className="pt-0 smallText">({measure})</td>
-                    <td className="pt-0 smallText"></td>
-                    <td className="pt-0 smallText">({distanceTime})</td>
-                    <td className="pt-0 smallText">(%)</td>
-                    <td className="pt-0 smallText">(mm/h)</td>
+                    <th className="pt-0 smallText"></th>
+                    <th className="pt-0 smallText">({measure})</th>
+                    <th className="pt-0 smallText"></th>
+                    <th className="pt-0 smallText">({distanceTime})</th>
+                    <th className="pt-0 smallText">(%)</th>
+                    <th className="pt-0 smallText">(mm/h)</th>
                   </tr>
                 </thead>
                 <tbody>
