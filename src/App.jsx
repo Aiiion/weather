@@ -173,7 +173,7 @@ function App() {
         <h3 className="headerData">Upcoming weather</h3>
         <div className="forecastContainer">
           {forecast.map((forecastData, idx) => (
-            <div className="dayContainer" key={idx}>
+            <div className="w-100" key={idx}>
               <h4>{translateEpochDay(forecastData[0].dt)}</h4>
               <table>
                 <thead>

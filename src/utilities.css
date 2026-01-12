@@ -1,0 +1,24 @@
+.justify-self-end{
+  justify-self: end;
+}
+.justify-self-start{
+  justify-self: start;
+}
+.flex{
+  display: flex;
+}
+.inline-flex{
+  display: inline-flex;
+}
+.pt-0{
+  padding-top:0px;
+}
+.ps-1{
+  padding-left: .3vw;
+}
+.m-0{
+  margin:0px;
+}
+.w-100{
+  width:100%;
+}
