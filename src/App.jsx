@@ -94,7 +94,7 @@ function App() {
       setWeather(data.currentWeather);
       setCity(data.currentWeather.name);
       setLoading(false);
-      setPrecipitation(data.currentWeather?.rain?.["1h"] ?? data.currentWeather?.snow["1h"] ?? 0);
+      setPrecipitation((data.currentWeather?.rain?.["1h"] ?? data.currentWeather?.snow?.["1h"]) ?? 0);
     }
     if (data.forecastWeather) {
       setForecast(Object.values(data.forecastWeather));
@@ -148,7 +148,11 @@ function App() {
           <br />
           <span className="smallText pt-0">{precipitation ? `${precipitation} mm/h` : ''}</span>
         </h3>
-        
+        {/* <span className="smallText">{" "}
+            {!loading
+              ? ` (feels like ${Math.floor(weather?.main.feels_like ?? 0)})`
+              : skeleton('small')}
+          </span> */}
       </header>
       <div className="subHeader">
         <div className="headerData">
