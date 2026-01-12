@@ -16,7 +16,7 @@ function App() {
   const [city, setCity] = useState();
   const [measure, setMeasure] = useState("°C");
   const [distanceTime, setDistanceTime] = useState("m/s");
-  const [weather, setWeather] = useState({});
+  const [weather, setWeather] = useState(null);
   const [forecast, setForecast] = useState([]);
   const [coords, setCoords] = useState({});
   const [geoId, setGeoId] = useState(null);
@@ -141,9 +141,9 @@ function App() {
       <header className="App-header">
         {/* <h3 className="headerData">{loading ? skeleton() : currentWeather} </h3> */}
         <h3 className="headerData">
-          {!loading ? Math.floor(weather.main.temp) + measure : skeleton('small')}
+          {!loading ? Math.floor(weather?.main.temp ?? 0) + measure : skeleton('small')}
           <br />
-          {!loading ? weather.weather[0].description : skeleton()}
+          {!loading ? weather?.weather[0].description : skeleton()}
         </h3>
         {/* <h3 className="headerData">
           {loading ? skeleton() : `${weather?.current?.rain ?? 0} mm rain`}
