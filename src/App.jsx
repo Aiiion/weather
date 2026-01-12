@@ -142,7 +142,7 @@ function App() {
       </div>
       <header className="App-header">
         <div className="headerData column">
-          <div className="inline-flex column">
+          <div className="flex column">
             <h3 className="m-0">
               {!loading
                 ? Math.floor(weather?.main.temp ?? 0) + measure
@@ -169,19 +169,19 @@ function App() {
       </header>
       <div className="subHeader">
         <div className="headerData">
-          {loading ? skeleton() : `wind ${weather?.wind.speed}${distanceTime}`}
+          {loading ? skeleton('small') : `wind ${weather?.wind.speed}${distanceTime}`}
         </div>
         <div className="headerData">
-          {loading ? skeleton() : `humidity ${weather?.main.humidity}%`}
+          {loading ? skeleton('small') : `humidity ${weather?.main.humidity}%`}
         </div>
         <div className="headerData">
           {loading
-            ? skeleton()
+            ? skeleton('small')
             : `sunrise at ${translateEpochTime(weather?.sys.sunrise)}`}
         </div>
         <div className="headerData">
           {loading
-            ? skeleton()
+            ? skeleton('small')
             : `sunset at ${translateEpochTime(weather?.sys.sunset)}`}
         </div>
       </div>
