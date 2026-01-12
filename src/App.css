@@ -15,13 +15,14 @@ body{
   color:white;
   
 }
+.smallText{
+  font-size: calc(8px + 1vmin);
+}
+
 .forecastContainer{
   display: flex;
   flex-direction: column;
   align-items: center;
-}
-.dayContainer{
-  width:100%;
 }
 
 button{
@@ -43,6 +44,7 @@ table{
 }
 .hourData{
   padding: 0.3vw;
+  padding-bottom: 0px;
 }
 
 h1{
@@ -58,6 +60,7 @@ h1{
 .App-header {
   min-height: 15vh;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: space-evenly; 
   font-size: calc(10px + 2vmin);
@@ -71,7 +74,9 @@ h1{
   margin-bottom: 2vh;
   padding-top:1px;  
   flex-grow: 1;
+  display:flex;
   min-height: .1em;
+  justify-content: center;
 }
 .subHeader{
   display: flex;
@@ -81,10 +86,7 @@ h1{
   font-size: calc(10px + 2vmin);
   background-color: #282c34;
 }
-.daily{
-  margin:0px;
 
-}
 .dailyContainer{
   display:flex;
   align-items:flex-start;
@@ -130,28 +132,27 @@ h1{
 }
 
 .skeleton{
-  animation: pulseSkeleton 1.5s linear infinite alternate;
-  opacity: 0.7
+  animation: pulseSkeleton 1s linear infinite alternate;
+  opacity: 0.7;
+  justify-self:stretch;
+  align-self:center;
+  display:flex;
+  height: 1em;
+  min-width:40vw;
 }
 .skeleton.text{
-  width: 80%;
-  height: 1em;
   border-radius: .3rem;
-  margin-left: 10%;
 }
 .skeleton.small{
-  width: 40%;
   height: 1em;
   border-radius: .3rem;
-  margin-left: 30%;
+  min-width:20vw;
 }
 @keyframes pulseSkeleton {
   0% {
     background-color: #3e424f;
-    filter: drop-shadow(0 0 0.25rem #3e424f);
   }
   100% {
     background-color: #2e323b;
-    filter: drop-shadow(0 0 0.28rem #3e424f);
   }
 }

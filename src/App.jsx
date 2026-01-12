@@ -16,13 +16,14 @@ function App() {
   const [city, setCity] = useState();
   const [measure, setMeasure] = useState("°C");
   const [distanceTime, setDistanceTime] = useState("m/s");
-  const [weather, setWeather] = useState({});
+  const [weather, setWeather] = useState(null);
   const [forecast, setForecast] = useState([]);
   const [coords, setCoords] = useState({});
   const [geoId, setGeoId] = useState(null);
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(true);
   const [permissionStatus, setPermissionStatus] = useState("pending");
+  const [precipitation, setPrecipitation] = useState(0);
 
   useEffect(() => {
     setLoading(true);
@@ -93,6 +94,7 @@ function App() {
       setWeather(data.currentWeather);
       setCity(data.currentWeather.name);
       setLoading(false);
+      setPrecipitation((data.currentWeather?.rain?.["1h"] ?? data.currentWeather?.snow?.["1h"]) ?? 0);
     }
     if (data.forecastWeather) {
       setForecast(Object.values(data.forecastWeather));
@@ -139,28 +141,48 @@ function App() {
         {tempButton()}
       </div>
       <header className="App-header">
-        {/* <h3 className="headerData">{loading ? skeleton() : currentWeather} </h3> */}
-        <h3 className="headerData">
-          {!loading ? Math.floor(weather.main.temp) + measure : skeleton('small')}
-          <br />
-          {!loading ? weather.weather[0].description : skeleton()}
-        </h3>
-        {/* <h3 className="headerData">
-          {loading ? skeleton() : `${weather?.current?.rain ?? 0} mm rain`}
-        </h3> */}
+        <div className="headerData column">
+          <div className="flex column">
+            <h3 className="m-0">
+              {!loading
+                ? Math.floor(weather?.main.temp ?? 0) + measure
+                : skeleton("small")}
+            </h3>
+            <br />
+            <span className="smallText mt-n3">
+              {!loading
+                ? ` (feels like ${Math.floor(weather?.main.feels_like ?? 0)})`
+                : skeleton("small")}
+            </span>
+          </div>
+
+          <div className="inline-flex column">
+            <h3 className="m-0">
+              {!loading ? weather?.weather[0].description : skeleton()}
+            </h3>
+
+            <span className="smallText pt-0">
+              {precipitation ? `${precipitation} mm/h` : ""}
+            </span>
+          </div>
+        </div>
       </header>
       <div className="subHeader">
         <div className="headerData">
-          {loading ? skeleton() : `wind ${weather?.wind.speed}${distanceTime}`}
+          {loading ? skeleton('small') : `wind ${weather?.wind.speed}${distanceTime}`}
         </div>
         <div className="headerData">
-          {loading ? skeleton() : `humidity ${weather?.main.humidity}%`}
+          {loading ? skeleton('small') : `humidity ${weather?.main.humidity}%`}
         </div>
         <div className="headerData">
-          {loading ? skeleton() : `sunrise at ${translateEpochTime(weather?.sys.sunrise)}`}
+          {loading
+            ? skeleton('small')
+            : `sunrise at ${translateEpochTime(weather?.sys.sunrise)}`}
         </div>
         <div className="headerData">
-          {loading ? skeleton() : `sunset at ${translateEpochTime(weather?.sys.sunset)}`}
+          {loading
+            ? skeleton('small')
+            : `sunset at ${translateEpochTime(weather?.sys.sunset)}`}
         </div>
       </div>
 
@@ -168,16 +190,25 @@ function App() {
         <h3 className="headerData">Upcoming weather</h3>
         <div className="forecastContainer">
           {forecast.map((forecastData, idx) => (
-            <div className="dayContainer" key={idx}>
+            <div className="w-100" key={idx}>
               <h4>{translateEpochDay(forecastData[0].dt)}</h4>
               <table>
                 <thead>
                   <tr>
                     <th className="hourData">Time</th>
-                    <th className="hourData">Temp</th>
+                    <th className="hourData">Temp.</th>
                     <th className="hourData">Weather</th>
                     <th className="hourData">Wind</th>
-                    <th className="hourData">Humidity</th>
+                    <th className="hourData">Hm.</th>
+                    <th className="hourData">Prec.</th>
+                  </tr>
+                  <tr>
+                    <th className="pt-0 smallText"></th>
+                    <th className="pt-0 smallText">({measure})</th>
+                    <th className="pt-0 smallText"></th>
+                    <th className="pt-0 smallText">({distanceTime})</th>
+                    <th className="pt-0 smallText">(%)</th>
+                    <th className="pt-0 smallText">(mm/h)</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -187,17 +218,24 @@ function App() {
                         {translateEpochTime(hour.dt)}
                       </td>
                       <td className="hourData">
-                        {Math.floor(hour.main.temp)}
-                        {measure}
+                        <div className="ps-3 flex">
+                          <span className="">{Math.floor(hour.main.temp)}</span>
+                          <span className="smallText" title="feels like">
+                            {" "}
+                            ({Math.floor(hour.main.feels_like)})
+                          </span>
+                        </div>
                       </td>
                       <td className="hourData">
                         {hour.weather[0].description}
                       </td>
                       <td className="hourData">
                         {Math.floor(hour.wind.speed)}
-                        {distanceTime}
                       </td>
-                      <td className="hourData">{hour.main.humidity}%</td>
+                      <td className="hourData">{hour.main.humidity}</td>
+                      <td className="hourData">
+                        {hour.rain?.["1h"] ?? hour.snow?.["1h"] ?? 0}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
