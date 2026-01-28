@@ -112,6 +112,8 @@ function App() {
       data.weatherWarnings.severity !== "NONE"
     ) {
       setWeatherWarning(data.weatherWarnings);
+    } else {
+      setWeatherWarning(null);
     }
   };
 
