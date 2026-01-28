@@ -1,7 +1,7 @@
 import React from "react";
 import "./WarningIcon.css";
 
-const WarningIcon = ({ color, size = 20, className = "", onClick }) => {
+const WarningIcon = ({ color, size = "1em", className = "", title = "", onClick }) => {
   
   const warningColor = color ? (() => {
     switch (color) {
@@ -16,17 +16,19 @@ const WarningIcon = ({ color, size = 20, className = "", onClick }) => {
     }
   })() : "currentColor";
 
+  const sizeValue = typeof size === "number" ? `${size}px` : size;
   const style = {
     "--warning-color": warningColor,
-    width: size,
-    height: size,
+    width: sizeValue,
+    height: sizeValue,
   };
   const glowClass = color ? "glow" : "";
   return (
     <span
-      className={`warning-icon ${glowClass} ${className}`}
+      className={`warning-icon ${glowClass} ${className} ps-1`}
       style={style}
       onClick={onClick}
+      title={title}
       role={onClick ? "button" : undefined}
       tabIndex={onClick ? 0 : undefined}
       onKeyDown={e => {

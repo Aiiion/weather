@@ -176,8 +176,7 @@ function App() {
                 {!loading && weatherWarning ? (
                   <WarningIcon
                     color={weatherWarning?.severity ?? undefined}
-                    // color="RED"
-                    size={26}
+                    title="Click for weather warning details"
                     onClick={() => setIsWarningOpen(true)}
                   />
                 ) : null}
@@ -271,8 +270,9 @@ function App() {
       </div>
       <View getWeatherData={getWeatherData} />
       <WarningModal open={isWarningOpen} onClose={() => setIsWarningOpen(false)}>
-        <h2>Test</h2>
-        <p>This is a test popup covering the page.</p>
+        <p><b>{weatherWarning?.description}</b></p>
+        <p>{weatherWarning?.severityDescription}</p>
+        <span><i>This feature is in beta, please check your local weather service for official warnings.</i></span>
       </WarningModal>
     </div>
   );

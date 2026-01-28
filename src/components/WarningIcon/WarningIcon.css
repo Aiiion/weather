@@ -2,8 +2,10 @@
   display: inline-block;
   line-height: 0;
   color: var(--warning-color, #ffcc00);
-  width: auto;
-  height: auto;
+  font-size: inherit;
+  width: 1em;
+  height: 1em;
+  vertical-align: middle;
 }
 .warning-icon[role="button"] {
   cursor: pointer;
