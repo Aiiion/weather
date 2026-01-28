@@ -32,7 +32,10 @@ const WarningIcon = ({ color, size = "1em", className = "", title = "", onClick 
       tabIndex={onClick ? 0 : undefined}
       onKeyDown={e => {
         if (!onClick) return;
-        if (e.key === "Enter" || e.key === " ") onClick(e);
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onClick(e);
+        }
       }}
     >
       <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
