@@ -1,5 +1,7 @@
 import "./App.css";
 import View from "./View.jsx";
+import WarningIcon from "./components/WarningIcon/WarningIcon.jsx";
+import WarningModal from "./components/WarningModal/WarningModal.jsx";
 import { useEffect, useState } from "react";
 import { translateEpochTime, translateEpochDay } from "./helpers.js";
 
@@ -18,10 +20,12 @@ function App() {
   const [distanceTime, setDistanceTime] = useState("m/s");
   const [weather, setWeather] = useState(null);
   const [forecast, setForecast] = useState([]);
+  const [weatherWarning, setWeatherWarning] = useState(null);
   const [coords, setCoords] = useState({});
   const [geoId, setGeoId] = useState(null);
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [isWarningOpen, setIsWarningOpen] = useState(false);
   const [permissionStatus, setPermissionStatus] = useState("pending");
   const [precipitation, setPrecipitation] = useState(0);
 
@@ -51,12 +55,12 @@ function App() {
             reject("Unable to retrieve your location");
             printNoLocationError();
           },
-          { 
-            enableHighAccuracy: false, 
+          {
+            enableHighAccuracy: false,
             timeout: 45 * 1000,
-            maximumAge: 20 * 1000 
-          }
-        )
+            maximumAge: 20 * 1000,
+          },
+        ),
       );
     });
   };
@@ -84,8 +88,8 @@ function App() {
       .then((res) => updateData(res.data))
       .then(() => navigator.geolocation.clearWatch(geoId))
       .catch(() => {
-        setError(true)
-        setLoading(false)
+        setError(true);
+        setLoading(false);
       });
   };
 
@@ -94,10 +98,22 @@ function App() {
       setWeather(data.currentWeather);
       setCity(data.currentWeather.name);
       setLoading(false);
-      setPrecipitation((data.currentWeather?.rain?.["1h"] ?? data.currentWeather?.snow?.["1h"]) ?? 0);
+      setPrecipitation(
+        data.currentWeather?.rain?.["1h"] ??
+          data.currentWeather?.snow?.["1h"] ??
+          0,
+      );
     }
     if (data.forecastWeather) {
       setForecast(Object.values(data.forecastWeather));
+    }
+    if (
+      data.weatherWarnings?.severity &&
+      data.weatherWarnings.severity !== "NONE"
+    ) {
+      setWeatherWarning(data.weatherWarnings);
+    } else {
+      setWeatherWarning(null);
     }
   };
 
@@ -148,8 +164,7 @@ function App() {
                 ? Math.floor(weather?.main.temp ?? 0) + measure
                 : skeleton("small")}
             </h3>
-            <br />
-            <span className="smallText mt-n3">
+            <span className="smallText mt-n1">
               {!loading
                 ? ` (feels like ${Math.floor(weather?.main.feels_like ?? 0)})`
                 : skeleton("small")}
@@ -159,6 +174,15 @@ function App() {
           <div className="inline-flex column">
             <h3 className="m-0">
               {!loading ? weather?.weather[0].description : skeleton()}
+              <span className="p-1">
+                {!loading && weatherWarning ? (
+                  <WarningIcon
+                    color={weatherWarning?.severity ?? undefined}
+                    title="Click for weather warning details"
+                    onClick={() => setIsWarningOpen(true)}
+                  />
+                ) : null}
+              </span>
             </h3>
 
             <span className="smallText pt-0">
@@ -169,19 +193,21 @@ function App() {
       </header>
       <div className="subHeader">
         <div className="headerData">
-          {loading ? skeleton('small') : `wind ${weather?.wind.speed}${distanceTime}`}
+          {loading
+            ? skeleton("small")
+            : `wind ${weather?.wind.speed}${distanceTime}`}
         </div>
         <div className="headerData">
-          {loading ? skeleton('small') : `humidity ${weather?.main.humidity}%`}
+          {loading ? skeleton("small") : `humidity ${weather?.main.humidity}%`}
         </div>
         <div className="headerData">
           {loading
-            ? skeleton('small')
+            ? skeleton("small")
             : `sunrise at ${translateEpochTime(weather?.sys.sunrise)}`}
         </div>
         <div className="headerData">
           {loading
-            ? skeleton('small')
+            ? skeleton("small")
             : `sunset at ${translateEpochTime(weather?.sys.sunset)}`}
         </div>
       </div>
@@ -245,6 +271,11 @@ function App() {
         </div>
       </div>
       <View getWeatherData={getWeatherData} />
+      <WarningModal open={isWarningOpen} onClose={() => setIsWarningOpen(false)}>
+        <p><b>{weatherWarning?.description}</b></p>
+        <p>{weatherWarning?.severityDescription}</p>
+        <span><i>This feature is in beta, please check your local weather service for official warnings.</i></span>
+      </WarningModal>
     </div>
   );
 }
