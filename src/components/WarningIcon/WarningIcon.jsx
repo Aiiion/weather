@@ -1,4 +1,3 @@
-import React from "react";
 import "./WarningIcon.css";
 
 const WarningIcon = ({ color, size = "1em", className = "", title = "", onClick }) => {

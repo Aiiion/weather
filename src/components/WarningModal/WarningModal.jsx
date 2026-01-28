@@ -1,4 +1,3 @@
-import React from "react";
 import "./WarningModal.css";
 
 const WarningModal = ({ open, onClose, children }) => {
