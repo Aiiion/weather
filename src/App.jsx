@@ -1,6 +1,7 @@
 import "./App.css";
 import View from "./View.jsx";
-import WarningIcon from "./WarningIcon.jsx";
+import WarningIcon from "./components/WarningIcon/WarningIcon.jsx";
+import WarningModal from "./components/WarningModal/WarningModal.jsx";
 import { useEffect, useState } from "react";
 import { translateEpochTime, translateEpochDay } from "./helpers.js";
 
@@ -24,6 +25,7 @@ function App() {
   const [geoId, setGeoId] = useState(null);
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [isWarningOpen, setIsWarningOpen] = useState(false);
   const [permissionStatus, setPermissionStatus] = useState("pending");
   const [precipitation, setPrecipitation] = useState(0);
 
@@ -175,7 +177,8 @@ function App() {
                   <WarningIcon
                     color={weatherWarning?.severity ?? undefined}
                     // color="RED"
-                    size={22}
+                    size={26}
+                    onClick={() => setIsWarningOpen(true)}
                   />
                 ) : null}
               </span>
@@ -267,6 +270,10 @@ function App() {
         </div>
       </div>
       <View getWeatherData={getWeatherData} />
+      <WarningModal open={isWarningOpen} onClose={() => setIsWarningOpen(false)}>
+        <h2>Test</h2>
+        <p>This is a test popup covering the page.</p>
+      </WarningModal>
     </div>
   );
 }
