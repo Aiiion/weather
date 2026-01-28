@@ -25,9 +25,16 @@ const WarningIcon = ({ color, size = 20, className = "" }) => {
   return (
     <span className={`warning-icon ${glowClass} ${className}`} style={style}>
       <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-        <path d="M1 21h22L12 2 1 21z" />
-        <rect x="11" y="10" width="2" height="5" rx="1" />
-        <rect x="11" y="17" width="2" height="2" rx="1" />
+        <path
+          d="M12 3.2 L2.4 20h19.2L12 3.2z"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.6"
+          strokeLinejoin="round"
+          strokeLinecap="round"
+        />
+        <rect x="11" y="8.2" width="2" height="5.6" rx="1" fill="currentColor" />
+        <circle cx="12" cy="15.9" r="1" fill="currentColor" />
       </svg>
     </span>
   );
