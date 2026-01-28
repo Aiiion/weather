@@ -1,0 +1,22 @@
+.warning-icon {
+  display: inline-block;
+  line-height: 0;
+  color: var(--warning-color, #ffcc00);
+  width: auto;
+  height: auto;
+}
+.warning-icon svg {
+  width: 100%;
+  height: 100%;
+  fill: currentColor;
+  transition: filter 200ms ease, transform 200ms ease;
+  display: block;
+}
+.warning-icon.glow svg {
+  filter: drop-shadow(0 0 6px var(--warning-color));
+  animation: warning-pulse 1.6s infinite;
+}
+@keyframes warning-pulse {
+  0%, 100% { filter: drop-shadow(0 0 4px var(--warning-color)); transform: scale(1); }
+  50% { filter: drop-shadow(0 0 10px var(--warning-color)); transform: scale(1.04); }
+}

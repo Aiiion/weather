@@ -22,6 +22,9 @@
 .column{
   flex-direction: column;
 }
+.p-1 {
+  padding: .3vw;
+}
 .pt-0{
   padding-top:0px;
 }
