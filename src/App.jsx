@@ -99,8 +99,8 @@ function App() {
       setCity(data.currentWeather.name);
       setLoading(false);
       setPrecipitation(
-        data.currentWeather?.rain?.["1h"] ??
-          data.currentWeather?.snow?.["1h"] ??
+        data.currentWeather?.rain?.["3h"] ??
+          data.currentWeather?.snow?.["3h"] ??
           0,
       );
     }
