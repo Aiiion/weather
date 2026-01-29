@@ -2,6 +2,7 @@ import "./App.css";
 import View from "./View.jsx";
 import WarningIcon from "./components/WarningIcon/WarningIcon.jsx";
 import WarningModal from "./components/WarningModal/WarningModal.jsx";
+import Tooltip from "./components/Tooltip/Tooltip.jsx";
 import { useEffect, useState } from "react";
 import { translateEpochTime, translateEpochDay } from "./helpers.js";
 
@@ -187,6 +188,12 @@ function App() {
 
             <span className="smallText pt-0">
               {precipitation ? `${precipitation} mm/h` : ""}
+              {weather?.snow?.["1h"] ? (
+                <Tooltip
+                  text={`While snow is measured in mm, 1 mm of snow is approximately equivalent to 1 cm of snow depth.`}
+                  ariaLabel="Snow measurement info"
+                />
+              ) : null}
             </span>
           </div>
         </div>
@@ -234,7 +241,7 @@ function App() {
                     <th className="pt-0 smallText"></th>
                     <th className="pt-0 smallText">({distanceTime})</th>
                     <th className="pt-0 smallText">(%)</th>
-                    <th className="pt-0 smallText">(mm/h)</th>
+                    <th className="pt-0 smallText">(mm/3h)</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -260,7 +267,7 @@ function App() {
                       </td>
                       <td className="hourData">{hour.main.humidity}</td>
                       <td className="hourData">
-                        {hour.rain?.["1h"] ?? hour.snow?.["1h"] ?? 0}
+                        {hour.rain?.["3h"] ?? hour.snow?.["3h"] ?? 0}
                       </td>
                     </tr>
                   ))}
@@ -271,10 +278,20 @@ function App() {
         </div>
       </div>
       <View getWeatherData={getWeatherData} />
-      <WarningModal open={isWarningOpen} onClose={() => setIsWarningOpen(false)}>
-        <p><b>{weatherWarning?.description}</b></p>
+      <WarningModal
+        open={isWarningOpen}
+        onClose={() => setIsWarningOpen(false)}
+      >
+        <p>
+          <b>{weatherWarning?.description}</b>
+        </p>
         <p>{weatherWarning?.severityDescription}</p>
-        <span><i>This feature is in beta, please check your local weather service for official warnings.</i></span>
+        <span>
+          <i>
+            This feature is in beta, please check your local weather service for
+            official warnings.
+          </i>
+        </span>
       </WarningModal>
     </div>
   );
