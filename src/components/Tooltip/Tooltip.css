@@ -7,9 +7,9 @@
 .tooltip-icon {
   height: 1em;
   border-radius: 50%;
-  border: 2px solid rgba(255, 255, 255, 0.95);
+  border: 2px solid #c6c6cc;
   background: transparent;
-  color: white;
+  color: #c6c6cc;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -17,10 +17,15 @@
   font-family: inherit;
   cursor: pointer;
   line-height: 1;
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+.tooltip-icon:hover {
+  border-color: #e0e2ed;
+  color: #e0e2ed;
 }
 .tooltip-icon:focus {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.06);
+  box-shadow: 0 0 0 3px rgba(178, 205, 187, 0.2);
 }
 
 .tooltip-bubble {
@@ -28,8 +33,8 @@
   bottom: calc(100% + 10px);
   left: 50%;
   transform: translateX(-50%) translateY(6px);
-  background: rgba(0, 0, 0, 0.87);
-  color: #fff;
+  background: #272a32;
+  color: #e0e2ed;
   padding: 0.45rem 0.7rem;
   border-radius: 8px;
   white-space: nowrap;
@@ -39,7 +44,8 @@
     opacity 180ms ease,
     transform 180ms ease;
   font-size: calc(9px + 0.2vmin);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.36);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  border: 1px solid #32353d;
   z-index: 60;
 }
 
@@ -51,7 +57,9 @@
   transform: translateX(-50%) rotate(45deg);
   width: 10px;
   height: 10px;
-  background: rgba(0, 0, 0, 0.87);
+  background: #272a32;
+  border-right: 1px solid #32353d;
+  border-bottom: 1px solid #32353d;
   z-index: 59;
 }
 
@@ -62,5 +70,5 @@
 }
 
 .tooltip.open .tooltip-icon {
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(178, 205, 187, 0.1);
 }
