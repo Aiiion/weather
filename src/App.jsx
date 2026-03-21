@@ -360,7 +360,7 @@ function App() {
               ))
             ) : (
               getDailyForecast().map((day, idx) => (
-                <div key={idx} className="space-y-0">
+                <div key={day.day} className="space-y-0">
                   <button 
                     onClick={() => toggleDayExpanded(idx)}
                     className={`asymmetric-radius p-4 flex items-center justify-between w-full text-left transition-colors ${
