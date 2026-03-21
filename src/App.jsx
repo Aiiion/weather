@@ -215,8 +215,11 @@ function App() {
   const getDailyForecast = () => {
     return forecast.filter(dayData => dayData.length > 0).map((dayData, idx) => {
       const firstEntry = dayData[0];
-      // Prefer 13:00 timeslot for day icon (more representative), fallback to first
-      const noonEntry = dayData.find(h => new Date(h.dt * 1000).getHours() === 13) || firstEntry;
+      // Find entry closest to midday (12:00-15:00 range typical in 3-hour data)
+      const noonEntry = dayData.find(h => {
+        const hour = new Date(h.dt * 1000).getHours();
+        return hour >= 12 && hour <= 15;
+      }) || firstEntry;
       const temps = dayData.map(h => h.main.temp);
       const maxTemp = Math.round(Math.max(...temps));
       const minTemp = Math.round(Math.min(...temps));
