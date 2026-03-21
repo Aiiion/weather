@@ -2,7 +2,7 @@ import "./App.css";
 import WarningIcon from "./components/WarningIcon/WarningIcon.jsx";
 import WarningModal from "./components/WarningModal/WarningModal.jsx";
 import Tooltip from "./components/Tooltip/Tooltip.jsx";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { translateEpochTime, translateEpochDayShort } from "./helpers.js";
 
 const API_BASE_URL = `https://api.alexbierhance.com/weather/aggregate?`;
@@ -77,15 +77,36 @@ function App() {
   const [precipitation, setPrecipitation] = useState(0);
   // const [activeNav, setActiveNav] = useState("weather");
   const [expandedDay, setExpandedDay] = useState(null);
+  const abortControllerRef = useRef(null);
 
   useEffect(() => {
+    // Cancel any in-flight request
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    
+    // Clear stale data and set loading state
     setLoading(true);
+    setWeather(null);
+    setForecast([]);
+    setWeatherWarning(null);
+    
     if (!navigator.geolocation) {
       alert("Geolocation is not supported by your browser");
       setLoading(false);
       return;
     }
-    getWeatherData(measure);
+    
+    // Create new AbortController for this request
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+    
+    getWeatherData(measure, controller.signal);
+    
+    return () => {
+      // Cleanup: abort on unmount or before next effect
+      controller.abort();
+    };
   }, [measure]);
 
   const getLatLon = () => {
@@ -128,16 +149,25 @@ function App() {
     setCoords(coords);
     return coords;
   };
-  const getWeatherData = (measureValue) => {
+  const getWeatherData = (measureValue, signal) => {
     setCity(null);
     getLatLon()
       .then(cacheCoords)
       .then((coords) => createApiUrl(coords, measureValue))
-      .then(fetch)
+      .then((url) => fetch(url, { signal }))
       .then(toJSON)
-      .then((res) => updateData(res.data))
+      .then((res) => {
+        // Only update if this request wasn't aborted
+        if (!signal?.aborted) {
+          updateData(res.data);
+        }
+      })
       .then(() => navigator.geolocation.clearWatch(geoId))
-      .catch(() => {
+      .catch((err) => {
+        // Ignore abort errors, handle other errors
+        if (err.name === 'AbortError') {
+          return;
+        }
         setError(true);
         setLoading(false);
       });
