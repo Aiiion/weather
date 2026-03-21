@@ -148,7 +148,7 @@ function App() {
 
   // Get daily forecast summary (first entry of each day)
   const getDailyForecast = () => {
-    return forecast.map((dayData, idx) => {
+    return forecast.filter(dayData => dayData.length > 0).map((dayData, idx) => {
       const firstEntry = dayData[0];
       const temps = dayData.map(h => h.main.temp);
       const maxTemp = Math.round(Math.max(...temps));
