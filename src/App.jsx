@@ -190,11 +190,14 @@ function App() {
       const temps = dayData.map(h => h.main.temp);
       const maxTemp = Math.round(Math.max(...temps));
       const minTemp = Math.round(Math.min(...temps));
+      // Calculate total precipitation for the day
+      const totalPrecipitation = dayData.reduce((sum, h) => sum + (h.rain?.["3h"] ?? h.snow?.["3h"] ?? 0), 0);
       return {
         day: translateEpochDayShort(firstEntry.dt),
         icon: getWeatherIcon(noonEntry.weather[0]),
         maxTemp,
         minTemp,
+        precipitation: Math.round(totalPrecipitation * 10) / 10,
         isFirst: idx === 0,
         hourlyData: dayData.map(hour => ({
           time: translateEpochTime(hour.dt),
@@ -203,7 +206,8 @@ function App() {
           description: hour.weather[0]?.description,
           icon: getWeatherIcon(hour.weather[0]),
           wind: Math.round(hour.wind.speed),
-          humidity: hour.main.humidity
+          humidity: hour.main.humidity,
+          precipitation: hour.rain?.["3h"] ?? hour.snow?.["3h"] ?? 0
         }))
       };
     });
@@ -415,6 +419,12 @@ function App() {
                     <div className="flex items-center gap-4">
                       <span className="text-on-surface font-semibold">{day.maxTemp}°</span>
                       <span className="text-on-surface-variant text-sm">{day.minTemp}°</span>
+                      {day.precipitation > 0 && (
+                        <div className="flex items-center gap-1 text-on-surface-variant text-xs">
+                          <span className="material-symbols-outlined text-sm">water_drop</span>
+                          <span>{day.precipitation}mm</span>
+                        </div>
+                      )}
                       <span className={`material-symbols-outlined text-on-surface-variant text-lg transition-transform duration-200 ${expandedDay === idx ? 'rotate-180' : ''}`}>
                         expand_more
                       </span>
@@ -444,6 +454,12 @@ function App() {
                               <span className="material-symbols-outlined text-sm">humidity_percentage</span>
                               <span>{hour.humidity}%</span>
                             </div>
+                            {hour.precipitation > 0 && (
+                              <div className="flex items-center gap-1 text-on-surface-variant text-xs">
+                                <span className="material-symbols-outlined text-sm">water_drop</span>
+                                <span>{Math.round(hour.precipitation * 10) / 10}mm</span>
+                              </div>
+                            )}
                           </div>
                         </div>
                       ))}
