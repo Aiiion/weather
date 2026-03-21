@@ -199,15 +199,38 @@ function App() {
             </h1>
           )}
         </div>
-        <button 
-          onClick={error ? (permissionStatus !== "granted" ? refresh : () => getWeatherData(measure)) : switchTemp}
-          className="text-primary hover:bg-surface-container transition-colors duration-300 p-2 rounded-full active:scale-95"
-          title={error ? "Retry" : "Switch Units"}
-        >
-          <span className="material-symbols-outlined">
-            {error ? "refresh" : "swap_horiz"}
-          </span>
-        </button>
+        {error ? (
+          <button 
+            onClick={permissionStatus !== "granted" ? refresh : () => getWeatherData(measure)}
+            className="text-primary hover:bg-surface-container transition-colors duration-300 p-2 rounded-full active:scale-95"
+            title="Retry"
+          >
+            <span className="material-symbols-outlined">refresh</span>
+          </button>
+        ) : (
+          <div className="flex items-center bg-surface-container-low rounded-full p-1">
+            <button
+              onClick={() => { if (measure !== "°C") switchTemp(); }}
+              className={`px-3 py-1 rounded-full text-sm font-medium transition-all duration-200 ${
+                measure === "°C" 
+                  ? 'bg-surface-variant text-tertiary' 
+                  : 'text-on-surface-variant hover:text-primary'
+              }`}
+            >
+              °C
+            </button>
+            <button
+              onClick={() => { if (measure !== "°F") switchTemp(); }}
+              className={`px-3 py-1 rounded-full text-sm font-medium transition-all duration-200 ${
+                measure === "°F" 
+                  ? 'bg-surface-variant text-tertiary' 
+                  : 'text-on-surface-variant hover:text-primary'
+              }`}
+            >
+              °F
+            </button>
+          </div>
+        )}
       </header>
 
       <main className="px-4 pt-20 pb-4 w-full box-border flex-1">
@@ -287,34 +310,31 @@ function App() {
           </div>
 
           {/* Sunrise / Sunset Spanning Card */}
-          <div className="col-span-2 asymmetric-radius bg-surface-container p-6">
-            <div className="flex justify-between items-center">
-              <div className="flex flex-col gap-1">
-                <span className="font-['Inter'] text-[0.6875rem] font-bold uppercase tracking-[0.05em] text-on-surface-variant">Sunrise</span>
-                <div className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-tertiary">wb_twilight</span>
-                  <span className="text-lg font-medium">
-                    {loading ? (
-                      <span className="inline-block h-5 w-12 bg-surface-container-low rounded animate-pulse"></span>
-                    ) : (
-                      translateEpochTime(weather?.sys.sunrise)
-                    )}
-                  </span>
-                </div>
+          <div className="col-span-2 asymmetric-radius bg-surface-container p-5 flex flex-col justify-between h-32">
+            <div className="flex justify-between items-start">
+              <span className="font-['Inter'] text-[0.6875rem] font-bold uppercase tracking-[0.05em] text-on-surface-variant">Sunrise</span>
+              <span className="font-['Inter'] text-[0.6875rem] font-bold uppercase tracking-[0.05em] text-on-surface-variant">Sunset</span>
+            </div>
+            <div className="flex justify-between items-end">
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-tertiary">wb_twilight</span>
+                <span className="text-xl font-semibold text-on-surface">
+                  {loading ? (
+                    <span className="inline-block h-6 w-14 bg-surface-container-low rounded animate-pulse"></span>
+                  ) : (
+                    translateEpochTime(weather?.sys.sunrise)
+                  )}
+                </span>
               </div>
-              <div className="h-8 w-[1px] bg-outline-variant opacity-20"></div>
-              <div className="flex flex-col gap-1 items-end">
-                <span className="font-['Inter'] text-[0.6875rem] font-bold uppercase tracking-[0.05em] text-on-surface-variant">Sunset</span>
-                <div className="flex items-center gap-2">
-                  <span className="text-lg font-medium">
-                    {loading ? (
-                      <span className="inline-block h-5 w-12 bg-surface-container-low rounded animate-pulse"></span>
-                    ) : (
-                      translateEpochTime(weather?.sys.sunset)
-                    )}
-                  </span>
-                  <span className="material-symbols-outlined text-secondary">nights_stay</span>
-                </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xl font-semibold text-on-surface">
+                  {loading ? (
+                    <span className="inline-block h-6 w-14 bg-surface-container-low rounded animate-pulse"></span>
+                  ) : (
+                    translateEpochTime(weather?.sys.sunset)
+                  )}
+                </span>
+                <span className="material-symbols-outlined text-secondary">nights_stay</span>
               </div>
             </div>
           </div>
@@ -395,7 +415,7 @@ function App() {
       </main>
 
       {/* BottomNavBar */}
-      <nav className="sticky bottom-0 z-50 flex justify-around items-center px-4 pb-6 pt-4 bg-background/60 backdrop-blur-xl rounded-t-3xl shadow-[0_-10px_30px_rgba(0,0,0,0.08)] w-full box-border">
+      {/* <nav className="sticky bottom-0 z-50 flex justify-around items-center px-4 pb-6 pt-4 bg-background/60 backdrop-blur-xl rounded-t-3xl shadow-[0_-10px_30px_rgba(0,0,0,0.08)] w-full box-border">
         <button 
           onClick={() => setActiveNav("weather")}
           className={`flex flex-col items-center justify-center p-3 rounded-2xl transition-all duration-200 active:scale-90 ${
@@ -427,13 +447,17 @@ function App() {
           <span className="material-symbols-outlined">explore</span>
         </button>
         <button 
-          onClick={switchTemp}
-          className="flex flex-col items-center justify-center p-3 rounded-2xl transition-all duration-200 text-outline-variant hover:text-primary"
-          title="Switch Units"
+          onClick={() => setActiveNav("settings")}
+          className={`flex flex-col items-center justify-center p-3 rounded-2xl transition-all duration-200 ${
+            activeNav === "settings" 
+              ? 'bg-surface-variant text-tertiary' 
+              : 'text-outline-variant hover:text-primary'
+          }`}
+          title="Settings"
         >
           <span className="material-symbols-outlined">settings</span>
         </button>
-      </nav>
+      </nav> */}
 
       {/* Warning Modal */}
       <WarningModal
