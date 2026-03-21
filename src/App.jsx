@@ -360,7 +360,7 @@ function App() {
               ))
             ) : (
               getDailyForecast().map((day, idx) => (
-                <div key={idx} className="space-y-0">
+                <div key={day.day} className="space-y-0">
                   <button 
                     onClick={() => toggleDayExpanded(idx)}
                     aria-expanded={expandedDay === idx}
@@ -388,7 +388,7 @@ function App() {
                       day.isFirst ? 'border-t border-outline-variant/20' : ''
                     }`}>
                       {day.hourlyData.map((hour, hIdx) => (
-                        <div key={hIdx} className="flex items-center justify-between py-2 border-b border-outline-variant/10 last:border-b-0">
+                        <div key={`${day.day}-${hour.time}`} className="flex items-center justify-between py-2 border-b border-outline-variant/10 last:border-b-0">
                           <div className="flex items-center gap-3">
                             <span className="text-sm text-on-surface-variant w-12">{hour.time}</span>
                             <span className="material-symbols-outlined text-secondary text-lg">{hour.icon}</span>
