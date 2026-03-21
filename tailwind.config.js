@@ -1,0 +1,79 @@
+import forms from '@tailwindcss/forms';
+import containerQueries from '@tailwindcss/container-queries';
+
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: [
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
+  ],
+  darkMode: "class",
+  theme: {
+    extend: {
+      colors: {
+        "secondary-fixed-dim": "#b8c8da",
+        "on-primary-container": "#959aa9",
+        "primary": "#c2c6d6",
+        "on-background": "#e0e2ed",
+        "on-error": "#690005",
+        "on-primary": "#2b303c",
+        "on-tertiary-fixed-variant": "#344c3e",
+        "outline": "#909096",
+        "error": "#ffb4ab",
+        "inverse-primary": "#595e6c",
+        "primary-container": "#2d323e",
+        "surface-tint": "#c2c6d6",
+        "background": "#10131b",
+        "surface-bright": "#363941",
+        "tertiary-fixed": "#cee9d6",
+        "on-primary-fixed": "#161c27",
+        "secondary-fixed": "#d4e4f6",
+        "surface-variant": "#32353d",
+        "surface-container-highest": "#32353d",
+        "on-secondary-fixed-variant": "#394857",
+        "tertiary": "#b2cdbb",
+        "inverse-on-surface": "#2d3039",
+        "primary-fixed": "#dee2f2",
+        "on-tertiary-fixed": "#082014",
+        "tertiary-container": "#20372a",
+        "surface-container-high": "#272a32",
+        "surface-container-low": "#181b23",
+        "secondary-container": "#394857",
+        "surface-container": "#1c1f27",
+        "outline-variant": "#45474c",
+        "secondary": "#b8c8da",
+        "on-secondary-container": "#a7b7c8",
+        "on-tertiary": "#1e3529",
+        "on-primary-fixed-variant": "#424753",
+        "primary-fixed-dim": "#c2c6d6",
+        "surface": "#10131b",
+        "tertiary-fixed-dim": "#b2cdbb",
+        "inverse-surface": "#e0e2ed",
+        "on-surface-variant": "#c6c6cc",
+        "surface-dim": "#10131b",
+        "surface-container-lowest": "#0b0e15",
+        "on-surface": "#e0e2ed",
+        "on-secondary-fixed": "#0d1d2a",
+        "on-tertiary-container": "#87a090",
+        "on-error-container": "#ffdad6",
+        "on-secondary": "#223240",
+        "error-container": "#93000a"
+      },
+      fontFamily: {
+        "headline": ["Inter"],
+        "body": ["Inter"],
+        "label": ["Inter"]
+      },
+      borderRadius: {
+        "DEFAULT": "0.125rem",
+        "lg": "0.25rem",
+        "xl": "0.5rem",
+        "full": "0.75rem"
+      },
+    },
+  },
+  plugins: [
+    forms,
+    containerQueries,
+  ],
+}

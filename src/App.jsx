@@ -1,10 +1,9 @@
 import "./App.css";
-import View from "./View.jsx";
 import WarningIcon from "./components/WarningIcon/WarningIcon.jsx";
 import WarningModal from "./components/WarningModal/WarningModal.jsx";
 import Tooltip from "./components/Tooltip/Tooltip.jsx";
-import { useEffect, useState } from "react";
-import { translateEpochTime, translateEpochDay } from "./helpers.js";
+import { useEffect, useState, useRef } from "react";
+import { translateEpochTime, translateEpochDayShort } from "./helpers.js";
 
 const API_BASE_URL = `https://api.alexbierhance.com/weather/aggregate?`;
 
@@ -14,6 +13,53 @@ const createApiUrl = ({ lat, lon }, measureValue) => {
 };
 
 const toJSON = (response) => response.json();
+
+// Weather condition to icon mapping
+// Accepts weather object with icon code (e.g., "01d") or falls back to description
+const getWeatherIcon = (weatherData, isDay = true) => {
+  // If passed a string (description only), use legacy fallback
+  if (typeof weatherData === "string") {
+    return getWeatherIconFromDescription(weatherData, isDay);
+  }
+
+  // Prefer icon code from API (e.g., "01d", "10n")
+  const iconCode = weatherData?.icon;
+  if (iconCode) {
+    const isDayFromIcon = iconCode.endsWith("d");
+    const code = iconCode.slice(0, 2);
+    
+    // Map OpenWeatherMap icon codes to Material Symbols
+    switch (code) {
+      case "01": return isDayFromIcon ? "wb_sunny" : "nights_stay";
+      case "02": return isDayFromIcon ? "partly_cloudy_day" : "partly_cloudy_night";
+      case "03": return "cloudy";
+      case "04": return "cloudy";
+      case "09": return "rainy";
+      case "10": return "rainy";
+      case "11": return "thunderstorm";
+      case "13": return "weather_snowy";
+      case "50": return "foggy";
+      default: break;
+    }
+  }
+
+  // Fall back to description parsing
+  return getWeatherIconFromDescription(weatherData?.description, isDay);
+};
+
+const getWeatherIconFromDescription = (description, isDay = true) => {
+  const desc = description?.toLowerCase() || "";
+  // Check thunder/storm before rain/drizzle to handle "thunderstorm with rain" correctly
+  if (desc.includes("thunder") || desc.includes("storm")) return "thunderstorm";
+  if (desc.includes("snow")) return "weather_snowy";
+  if (desc.includes("rain") || desc.includes("drizzle")) return "rainy";
+  if (desc.includes("mist") || desc.includes("fog") || desc.includes("haze")) return "foggy";
+  if (desc.includes("cloud") && desc.includes("partly")) return isDay ? "partly_cloudy_day" : "partly_cloudy_night";
+  if (desc.includes("cloud")) return "cloudy";
+  if (desc.includes("clear") || desc.includes("sunny")) return isDay ? "wb_sunny" : "nights_stay";
+  // Neutral default when context is unknown
+  return "thermostat";
+};
 
 function App() {
   const [city, setCity] = useState();
@@ -29,15 +75,38 @@ function App() {
   const [isWarningOpen, setIsWarningOpen] = useState(false);
   const [permissionStatus, setPermissionStatus] = useState("pending");
   const [precipitation, setPrecipitation] = useState(0);
+  // const [activeNav, setActiveNav] = useState("weather");
+  const [expandedDay, setExpandedDay] = useState(null);
+  const abortControllerRef = useRef(null);
 
   useEffect(() => {
+    // Cancel any in-flight request
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    
+    // Clear stale data and set loading state
     setLoading(true);
+    setWeather(null);
+    setForecast([]);
+    setWeatherWarning(null);
+    
     if (!navigator.geolocation) {
       alert("Geolocation is not supported by your browser");
       setLoading(false);
       return;
     }
-    getWeatherData(measure);
+    
+    // Create new AbortController for this request
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+    
+    getWeatherData(measure, controller.signal);
+    
+    return () => {
+      // Cleanup: abort on unmount or before next effect
+      controller.abort();
+    };
   }, [measure]);
 
   const getLatLon = () => {
@@ -68,10 +137,11 @@ function App() {
   const getPermissonStatus = () =>
     navigator.permissions.query({ name: "geolocation" }).then((permission) => {
       setPermissionStatus(permission.state);
+      return permission.state;
     });
   const printNoLocationError = () =>
-    getPermissonStatus().then(() => {
-      if (permissionStatus === "denied") setCity("Location permission denied");
+    getPermissonStatus().then((state) => {
+      if (state === "denied") setCity("Location permission denied");
       else setCity("Unable to retrieve your location");
     });
 
@@ -79,16 +149,25 @@ function App() {
     setCoords(coords);
     return coords;
   };
-  const getWeatherData = (measureValue) => {
+  const getWeatherData = (measureValue, signal) => {
     setCity(null);
     getLatLon()
       .then(cacheCoords)
       .then((coords) => createApiUrl(coords, measureValue))
-      .then(fetch)
+      .then((url) => fetch(url, { signal }))
       .then(toJSON)
-      .then((res) => updateData(res.data))
+      .then((res) => {
+        // Only update if this request wasn't aborted
+        if (!signal?.aborted) {
+          updateData(res.data);
+        }
+      })
       .then(() => navigator.geolocation.clearWatch(geoId))
-      .catch(() => {
+      .catch((err) => {
+        // Ignore abort errors, handle other errors
+        if (err.name === 'AbortError') {
+          return;
+        }
         setError(true);
         setLoading(false);
       });
@@ -127,170 +206,359 @@ function App() {
       setDistanceTime("mph");
     }
   };
+
   function refresh() {
     window.location.reload();
   }
 
-  const tempButton = () => {
-    const func = error
-      ? permissionStatus !== "granted"
-        ? refresh
-        : getWeatherData
-      : switchTemp;
-    return (
-      <button
-        onClick={() => {
-          func();
-        }}
-      >
-        {!error ? "Switch Units" : "Retry"}
-      </button>
-    );
+  // Get daily forecast summary (first entry of each day)
+  const getDailyForecast = () => {
+    return forecast.filter(dayData => dayData.length > 0).map((dayData, idx) => {
+      const firstEntry = dayData[0];
+      // Find entry closest to midday (12:00-15:00 range typical in 3-hour data)
+      const noonEntry = dayData.find(h => {
+        const hour = new Date(h.dt * 1000).getHours();
+        return hour >= 12 && hour <= 15;
+      }) || firstEntry;
+      const temps = dayData.map(h => h.main.temp);
+      const maxTemp = Math.round(Math.max(...temps));
+      const minTemp = Math.round(Math.min(...temps));
+      // Calculate total precipitation for the day
+      const totalPrecipitation = dayData.reduce((sum, h) => sum + (h.rain?.["3h"] ?? h.snow?.["3h"] ?? 0), 0);
+      return {
+        day: translateEpochDayShort(firstEntry.dt),
+        icon: getWeatherIcon(noonEntry.weather[0]),
+        maxTemp,
+        minTemp,
+        precipitation: Math.round(totalPrecipitation * 10) / 10,
+        isFirst: idx === 0,
+        hourlyData: dayData.map(hour => ({
+          time: translateEpochTime(hour.dt),
+          temp: Math.round(hour.main.temp),
+          feelsLike: Math.round(hour.main.feels_like),
+          description: hour.weather[0]?.description,
+          icon: getWeatherIcon(hour.weather[0]),
+          wind: Math.round(hour.wind.speed),
+          humidity: hour.main.humidity,
+          precipitation: hour.rain?.["3h"] ?? hour.snow?.["3h"] ?? 0
+        }))
+      };
+    });
   };
 
-  function skeleton(className = "") {
-    return <div className={`skeleton text ${className}`}></div>;
-  }
-  return (
-    <div className="App">
-      <div className="topContainer">
-        <h1>{!loading ? city : <span className="loader"></span>}</h1>
-        {tempButton()}
-      </div>
-      <header className="App-header">
-        <div className="headerData column">
-          <div className="flex column">
-            <h3 className="m-0">
-              {!loading
-                ? Math.floor(weather?.main.temp ?? 0) + measure
-                : skeleton("small")}
-            </h3>
-            <span className="smallText mt-n1">
-              {!loading
-                ? ` (feels like ${Math.floor(weather?.main.feels_like ?? 0)})`
-                : skeleton("small")}
-            </span>
-          </div>
+  const toggleDayExpanded = (idx) => {
+    setExpandedDay(expandedDay === idx ? null : idx);
+  };
 
-          <div className="inline-flex column">
-            <h3 className="m-0">
-              {!loading ? weather?.weather[0].description : skeleton()}
-              <span className="p-1">
-                {!loading && weatherWarning ? (
+  return (
+    <div className="min-h-screen bg-background flex flex-col overflow-x-hidden">
+      {/* TopAppBar */}
+      <header className="bg-background flex justify-between items-center px-4 py-4 w-full fixed top-0 z-50 box-border">
+        <div className="flex items-center gap-2">
+          <span className="material-symbols-outlined text-primary">location_on</span>
+          {loading ? (
+            <div className="h-6 w-32 bg-surface-container-low rounded animate-pulse"></div>
+          ) : (
+            <h1 className="font-['Inter'] font-semibold tracking-[-0.02em] text-[1.25rem] text-primary">
+              {city}
+              {weatherWarning && (
+                <span className="ml-2 inline-flex">
                   <WarningIcon
                     color={weatherWarning?.severity ?? undefined}
                     title="Click for weather warning details"
                     onClick={() => setIsWarningOpen(true)}
                   />
-                ) : null}
+                </span>
+              )}
+            </h1>
+          )}
+  </div>
+  {error ? (
+    <button
+      onClick={refresh}
+      className="flex items-center justify-center bg-surface-container-low rounded-full p-2 text-on-surface-variant hover:text-primary transition-colors"
+      title="Retry"
+    >
+      <span className="material-symbols-outlined">refresh</span>
+    </button>
+  ) : (
+    <div className="flex items-center bg-surface-container-low rounded-full p-1">
+      <button
+        onClick={() => { if (measure !== "°C") switchTemp(); }}
+        className={`px-3 py-1 rounded-full text-sm font-medium transition-all duration-200 ${
+          measure === "°C" 
+            ? 'bg-surface-variant text-tertiary' 
+            : 'text-on-surface-variant hover:text-primary'
+        }`}
+      >
+        °C
+      </button>
+      <button
+        onClick={() => { if (measure !== "°F") switchTemp(); }}
+        className={`px-3 py-1 rounded-full text-sm font-medium transition-all duration-200 ${
+          measure === "°F" 
+            ? 'bg-surface-variant text-tertiary' 
+            : 'text-on-surface-variant hover:text-primary'
+        }`}
+      >
+        °F
+      </button>
+    </div>
+  )}
+</header>
+
+      <main className="px-4 pt-20 pb-4 w-full box-border flex-1">
+        {/* Hero Temperature Section */}
+        <section className="flex flex-col items-center mb-16 lg:mb-20">
+          {loading ? (
+            <div className="h-36 w-48 bg-surface-container-low rounded-xl animate-pulse"></div>
+          ) : weather ? (
+            <div className="relative">
+              <span className="text-[clamp(6rem,20vw,9rem)] font-medium text-primary tracking-tighter leading-none">
+                {Math.floor(weather.main.temp)}°
               </span>
-            </h3>
-
-            <span className="smallText pt-0">
-              {precipitation ? `${precipitation} mm/h` : ""}
-              {weather?.snow?.["1h"] ? (
-                <Tooltip
-                  text={`While snow is measured in mm, 1 mm of snow is approximately equivalent to 1 cm of snow depth.`}
-                  ariaLabel="Snow measurement info"
-                />
-              ) : null}
-            </span>
-          </div>
-        </div>
-      </header>
-      <div className="subHeader">
-        <div className="headerData">
-          {loading
-            ? skeleton("small")
-            : `wind ${weather?.wind.speed}${distanceTime}`}
-        </div>
-        <div className="headerData">
-          {loading ? skeleton("small") : `humidity ${weather?.main.humidity}%`}
-        </div>
-        <div className="headerData">
-          {loading
-            ? skeleton("small")
-            : `sunrise at ${translateEpochTime(weather?.sys.sunrise)}`}
-        </div>
-        <div className="headerData">
-          {loading
-            ? skeleton("small")
-            : `sunset at ${translateEpochTime(weather?.sys.sunset)}`}
-        </div>
-      </div>
-
-      <div className="hourly">
-        <h3 className="headerData">Upcoming weather</h3>
-        <div className="forecastContainer">
-          {forecast.map((forecastData, idx) => (
-            <div className="w-100" key={idx}>
-              <h4>{translateEpochDay(forecastData[0].dt)}</h4>
-              <table>
-                <thead>
-                  <tr>
-                    <th className="hourData">Time</th>
-                    <th className="hourData">Temp.</th>
-                    <th className="hourData">Weather</th>
-                    <th className="hourData">Wind</th>
-                    <th className="hourData">Hm.</th>
-                    <th className="hourData">Prec.</th>
-                  </tr>
-                  <tr>
-                    <th className="pt-0 smallText"></th>
-                    <th className="pt-0 smallText">({measure})</th>
-                    <th className="pt-0 smallText"></th>
-                    <th className="pt-0 smallText">({distanceTime})</th>
-                    <th className="pt-0 smallText">(%)</th>
-                    <th className="pt-0 smallText">(mm/3h)</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {forecastData.map((hour) => (
-                    <tr key={hour.dt}>
-                      <td className="hourData">
-                        {translateEpochTime(hour.dt)}
-                      </td>
-                      <td className="hourData">
-                        <div className="ps-3 flex">
-                          <span className="">{Math.floor(hour.main.temp)}</span>
-                          <span className="smallText" title="feels like">
-                            {" "}
-                            ({Math.floor(hour.main.feels_like)})
-                          </span>
-                        </div>
-                      </td>
-                      <td className="hourData">
-                        {hour.weather[0].description}
-                      </td>
-                      <td className="hourData">
-                        {Math.floor(hour.wind.speed)}
-                      </td>
-                      <td className="hourData">{hour.main.humidity}</td>
-                      <td className="hourData">
-                        {hour.rain?.["3h"] ?? hour.snow?.["3h"] ?? 0}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              <div className="absolute -top-4 -right-8">
+                <span className="material-symbols-outlined text-secondary text-5xl">
+                  {getWeatherIcon(weather.weather[0])}
+                </span>
+              </div>
             </div>
-          ))}
-        </div>
-      </div>
-      <View getWeatherData={getWeatherData} />
+          ) : null}
+          <p className="font-['Inter'] text-[0.6875rem] font-bold uppercase tracking-[0.05em] text-on-surface-variant mt-4">
+            {loading ? (
+              <span className="inline-block h-4 w-24 bg-surface-container-low rounded animate-pulse"></span>
+            ) : weather ? (
+              <>
+                feels like {Math.floor(weather.main.feels_like)}°
+                {precipitation > 0 && (
+                  <span className="ml-2">
+                    • {precipitation} mm/h
+                    {weather.snow?.["1h"] && (
+                      <Tooltip
+                        text="While snow is measured in mm, 1 mm of snow is approximately equivalent to 1 cm of snow depth."
+                        ariaLabel="Snow measurement info"
+                      />
+                    )}
+                  </span>
+                )}
+              </>
+            ) : null}
+          </p>
+          {!loading && weather?.weather[0]?.description && (
+            <p className="font-['Inter'] text-sm text-secondary mt-2 capitalize">
+              {weather.weather[0].description}
+            </p>
+          )}
+        </section>
+
+        {/* Bento Grid Data Points */}
+        <section className="grid grid-cols-2 gap-4 mb-16 lg:grid-cols-4 lg:gap-6">
+          {/* Wind */}
+          <div className="asymmetric-radius bg-surface-container-low p-5 flex flex-col justify-between h-32">
+            <div className="flex justify-between items-start">
+              <span className="font-['Inter'] text-[0.6875rem] font-bold uppercase tracking-[0.05em] text-on-surface-variant">Wind</span>
+              <span className="material-symbols-outlined text-secondary text-xl">air</span>
+            </div>
+            <div className="text-xl font-semibold text-on-surface">
+              {loading ? (
+                <span className="inline-block h-6 w-16 bg-surface-container rounded animate-pulse"></span>
+              ) : weather ? (
+                `${weather.wind.speed}${distanceTime}`
+              ) : '--'}
+            </div>
+          </div>
+
+          {/* Humidity */}
+          <div className="asymmetric-radius bg-surface-container-low p-5 flex flex-col justify-between h-32">
+            <div className="flex justify-between items-start">
+              <span className="font-['Inter'] text-[0.6875rem] font-bold uppercase tracking-[0.05em] text-on-surface-variant">Humidity</span>
+              <span className="material-symbols-outlined text-secondary text-xl">humidity_low</span>
+            </div>
+            <div className="text-xl font-semibold text-on-surface">
+              {loading ? (
+                <span className="inline-block h-6 w-12 bg-surface-container rounded animate-pulse"></span>
+              ) : weather ? (
+                `${weather.main.humidity}%`
+              ) : '--'}
+            </div>
+          </div>
+
+          {/* Sunrise / Sunset Spanning Card */}
+          <div className="col-span-2 asymmetric-radius bg-surface-container p-5 flex flex-col justify-between h-32">
+            <div className="flex justify-between items-start">
+              <span className="font-['Inter'] text-[0.6875rem] font-bold uppercase tracking-[0.05em] text-on-surface-variant">Sunrise</span>
+              <span className="font-['Inter'] text-[0.6875rem] font-bold uppercase tracking-[0.05em] text-on-surface-variant">Sunset</span>
+            </div>
+            <div className="flex justify-between items-end">
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-tertiary">wb_twilight</span>
+                <span className="text-xl font-semibold text-on-surface">
+                  {loading ? (
+                    <span className="inline-block h-6 w-14 bg-surface-container-low rounded animate-pulse"></span>
+                  ) : weather ? (
+                    translateEpochTime(weather.sys.sunrise)
+                  ) : '--'}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xl font-semibold text-on-surface">
+                  {loading ? (
+                    <span className="inline-block h-6 w-14 bg-surface-container-low rounded animate-pulse"></span>
+                  ) : weather ? (
+                    translateEpochTime(weather.sys.sunset)
+                  ) : '--'}
+                </span>
+                <span className="material-symbols-outlined text-secondary">nights_stay</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Forecast Section */}
+        <section>
+          <h2 className="font-['Inter'] text-[1.125rem] font-medium tracking-tight text-primary mb-6 ml-1">Upcoming weather</h2>
+          <div className="space-y-3">
+            {loading ? (
+              // Skeleton loading state
+              [...Array(5)].map((_, idx) => (
+                <div key={idx} className="asymmetric-radius bg-surface-container-low p-4 flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <span className="h-5 w-10 bg-surface-container rounded animate-pulse"></span>
+                    <span className="h-6 w-6 bg-surface-container rounded animate-pulse"></span>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <span className="h-5 w-8 bg-surface-container rounded animate-pulse"></span>
+                    <span className="h-4 w-6 bg-surface-container rounded animate-pulse"></span>
+                  </div>
+                </div>
+              ))
+            ) : (
+              getDailyForecast().map((day, idx) => (
+                <div key={day.day} className="space-y-0">
+                  <button 
+                    onClick={() => toggleDayExpanded(idx)}
+                    aria-expanded={expandedDay === idx}
+                    aria-controls={`day-panel-${idx}`}
+                    className={`asymmetric-radius p-4 flex items-center justify-between w-full text-left transition-colors ${
+                      day.isFirst ? 'bg-surface-container-highest' : 'bg-surface-container-low'
+                    } ${expandedDay === idx ? 'rounded-b-none' : ''}`}
+                  >
+                    <div className="flex items-center gap-4">
+                      <span className={`font-medium w-10 ${day.isFirst ? 'text-tertiary' : ''}`}>
+                        {day.day}
+                      </span>
+                      <span className="material-symbols-outlined text-secondary">{day.icon}</span>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <span className="text-on-surface font-semibold">{day.maxTemp}°</span>
+                      <span className="text-on-surface-variant text-sm">{day.minTemp}°</span>
+                      {day.precipitation > 0 && (
+                        <div className="flex items-center gap-1 text-on-surface-variant text-xs">
+                          <span className="material-symbols-outlined text-sm">water_drop</span>
+                          <span>{day.precipitation}mm</span>
+                        </div>
+                      )}
+                      <span className={`material-symbols-outlined text-on-surface-variant text-lg transition-transform duration-200 ${expandedDay === idx ? 'rotate-180' : ''}`}>
+                        expand_more
+                      </span>
+                    </div>
+                  </button>
+                  {expandedDay === idx && (
+                    <div id={`day-panel-${idx}`} className={`bg-surface-container p-4 rounded-b-3xl space-y-3 ${
+                      day.isFirst ? 'border-t border-outline-variant/20' : ''
+                    }`}>
+                      {day.hourlyData.map((hour, hIdx) => (
+                        <div key={`${day.day}-${hour.time}`} className="flex items-center justify-between py-2 border-b border-outline-variant/10 last:border-b-0">
+                          <div className="flex items-center gap-3">
+                            <span className="text-sm text-on-surface-variant w-12">{hour.time}</span>
+                            <span className="material-symbols-outlined text-secondary text-lg">{hour.icon}</span>
+                            <span className="text-sm text-on-surface-variant capitalize hidden sm:inline">{hour.description}</span>
+                          </div>
+                          <div className="flex items-center gap-4">
+                            <div className="flex flex-col items-end">
+                              <span className="text-on-surface font-medium">{hour.temp}°</span>
+                              <span className="text-on-surface-variant text-xs">Feels {hour.feelsLike}°</span>
+                            </div>
+                            <div className="flex items-center gap-1 text-on-surface-variant text-xs">
+                              <span className="material-symbols-outlined text-sm">air</span>
+                              <span>{hour.wind}{distanceTime}</span>
+                            </div>
+                            <div className="flex items-center gap-1 text-on-surface-variant text-xs hidden sm:flex">
+                              <span className="material-symbols-outlined text-sm">humidity_percentage</span>
+                              <span>{hour.humidity}%</span>
+                            </div>
+                            {hour.precipitation > 0 && (
+                              <div className="flex items-center gap-1 text-on-surface-variant text-xs">
+                                <span className="material-symbols-outlined text-sm">water_drop</span>
+                                <span>{Math.round(hour.precipitation * 10) / 10}mm</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))
+            )}
+          </div>
+        </section>
+      </main>
+
+      {/* BottomNavBar */}
+      {/* <nav className="sticky bottom-0 z-50 flex justify-around items-center px-4 pb-6 pt-4 bg-background/60 backdrop-blur-xl rounded-t-3xl shadow-[0_-10px_30px_rgba(0,0,0,0.08)] w-full box-border">
+        <button 
+          onClick={() => setActiveNav("weather")}
+          className={`flex flex-col items-center justify-center p-3 rounded-2xl transition-all duration-200 active:scale-90 ${
+            activeNav === "weather" 
+              ? 'bg-surface-variant text-tertiary' 
+              : 'text-outline-variant hover:text-primary'
+          }`}
+        >
+          <span className="material-symbols-outlined">wb_sunny</span>
+        </button>
+        <button 
+          onClick={() => setActiveNav("details")}
+          className={`flex flex-col items-center justify-center p-3 rounded-2xl transition-all duration-200 ${
+            activeNav === "details" 
+              ? 'bg-surface-variant text-tertiary' 
+              : 'text-outline-variant hover:text-primary'
+          }`}
+        >
+          <span className="material-symbols-outlined">table_rows</span>
+        </button>
+        <button 
+          onClick={() => setActiveNav("explore")}
+          className={`flex flex-col items-center justify-center p-3 rounded-2xl transition-all duration-200 ${
+            activeNav === "explore" 
+              ? 'bg-surface-variant text-tertiary' 
+              : 'text-outline-variant hover:text-primary'
+          }`}
+        >
+          <span className="material-symbols-outlined">explore</span>
+        </button>
+        <button 
+          onClick={() => setActiveNav("settings")}
+          className={`flex flex-col items-center justify-center p-3 rounded-2xl transition-all duration-200 ${
+            activeNav === "settings" 
+              ? 'bg-surface-variant text-tertiary' 
+              : 'text-outline-variant hover:text-primary'
+          }`}
+          title="Settings"
+        >
+          <span className="material-symbols-outlined">settings</span>
+        </button>
+      </nav> */}
+
+      {/* Warning Modal */}
       <WarningModal
         open={isWarningOpen}
         onClose={() => setIsWarningOpen(false)}
       >
-        <p>
-          <b>{weatherWarning?.description}</b>
-        </p>
-        <p>{weatherWarning?.severityDescription}</p>
-        <span>
-          <i>
-            This feature is in beta, please check your local weather service for
-            official warnings.
-          </i>
+        <p className="font-semibold text-on-surface">{weatherWarning?.description}</p>
+        <p className="text-on-surface-variant mt-2">{weatherWarning?.severityDescription}</p>
+        <span className="text-sm text-on-surface-variant italic mt-4 block">
+          This feature is in beta, please check your local weather service for official warnings.
         </span>
       </WarningModal>
     </div>

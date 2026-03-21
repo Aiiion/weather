@@ -21,6 +21,31 @@ export const translateEpochDay = (epoch) => {
       return "error";
   }
 };
+
+//translates the epoch value to short weekday (3 letters)
+export const translateEpochDayShort = (epoch) => {
+  let newDate = new Date(epoch * 1000);
+
+  switch (newDate.getDay()) {
+    case 1:
+      return "Mon";
+    case 2:
+      return "Tue";
+    case 3:
+      return "Wed";
+    case 4:
+      return "Thu";
+    case 5:
+      return "Fri";
+    case 6:
+      return "Sat";
+    case 0:
+      return "Sun";
+    default:
+      return "---";
+  }
+};
+
 //translates the epoch value to time in hours and minutes
 export const translateEpochTime = (epoch) => {
   if(!epoch) return "";
