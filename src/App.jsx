@@ -199,41 +199,40 @@ function App() {
               )}
             </h1>
           )}
-        </div>
-const getWeatherData = (measureValue) => {
-  setError(false);
-  setLoading(true);
-  setCity(null);
-  getLatLon()
-            title="Retry"
-          >
-            <span className="material-symbols-outlined">refresh</span>
-          </button>
-        ) : (
-          <div className="flex items-center bg-surface-container-low rounded-full p-1">
-            <button
-              onClick={() => { if (measure !== "°C") switchTemp(); }}
-              className={`px-3 py-1 rounded-full text-sm font-medium transition-all duration-200 ${
-                measure === "°C" 
-                  ? 'bg-surface-variant text-tertiary' 
-                  : 'text-on-surface-variant hover:text-primary'
-              }`}
-            >
-              °C
-            </button>
-            <button
-              onClick={() => { if (measure !== "°F") switchTemp(); }}
-              className={`px-3 py-1 rounded-full text-sm font-medium transition-all duration-200 ${
-                measure === "°F" 
-                  ? 'bg-surface-variant text-tertiary' 
-                  : 'text-on-surface-variant hover:text-primary'
-              }`}
-            >
-              °F
-            </button>
-          </div>
-        )}
-      </header>
+  </div>
+  {error ? (
+    <button
+      onClick={refresh}
+      className="flex items-center justify-center bg-surface-container-low rounded-full p-2 text-on-surface-variant hover:text-primary transition-colors"
+      title="Retry"
+    >
+      <span className="material-symbols-outlined">refresh</span>
+    </button>
+  ) : (
+    <div className="flex items-center bg-surface-container-low rounded-full p-1">
+      <button
+        onClick={() => { if (measure !== "°C") switchTemp(); }}
+        className={`px-3 py-1 rounded-full text-sm font-medium transition-all duration-200 ${
+          measure === "°C" 
+            ? 'bg-surface-variant text-tertiary' 
+            : 'text-on-surface-variant hover:text-primary'
+        }`}
+      >
+        °C
+      </button>
+      <button
+        onClick={() => { if (measure !== "°F") switchTemp(); }}
+        className={`px-3 py-1 rounded-full text-sm font-medium transition-all duration-200 ${
+          measure === "°F" 
+            ? 'bg-surface-variant text-tertiary' 
+            : 'text-on-surface-variant hover:text-primary'
+        }`}
+      >
+        °F
+      </button>
+    </div>
+  )}
+</header>
 
       <main className="px-4 pt-20 pb-4 w-full box-border flex-1">
         {/* Hero Temperature Section */}
