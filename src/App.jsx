@@ -200,10 +200,11 @@ function App() {
             </h1>
           )}
         </div>
-        {error ? (
-          <button 
-            onClick={permissionStatus !== "granted" ? refresh : () => getWeatherData(measure)}
-            className="text-primary hover:bg-surface-container transition-colors duration-300 p-2 rounded-full active:scale-95"
+const getWeatherData = (measureValue) => {
+  setError(false);
+  setLoading(true);
+  setCity(null);
+  getLatLon()
             title="Retry"
           >
             <span className="material-symbols-outlined">refresh</span>
