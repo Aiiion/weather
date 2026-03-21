@@ -363,6 +363,8 @@ function App() {
                 <div key={day.day} className="space-y-0">
                   <button 
                     onClick={() => toggleDayExpanded(idx)}
+                    aria-expanded={expandedDay === idx}
+                    aria-controls={`day-panel-${idx}`}
                     className={`asymmetric-radius p-4 flex items-center justify-between w-full text-left transition-colors ${
                       day.isFirst ? 'bg-surface-container-highest' : 'bg-surface-container-low'
                     } ${expandedDay === idx ? 'rounded-b-none' : ''}`}
@@ -382,7 +384,7 @@ function App() {
                     </div>
                   </button>
                   {expandedDay === idx && (
-                    <div className={`bg-surface-container p-4 rounded-b-3xl space-y-3 ${
+                    <div id={`day-panel-${idx}`} className={`bg-surface-container p-4 rounded-b-3xl space-y-3 ${
                       day.isFirst ? 'border-t border-outline-variant/20' : ''
                     }`}>
                       {day.hourlyData.map((hour, hIdx) => (
