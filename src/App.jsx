@@ -42,6 +42,7 @@ function App() {
   const [permissionStatus, setPermissionStatus] = useState("pending");
   const [precipitation, setPrecipitation] = useState(0);
   const [activeNav, setActiveNav] = useState("weather");
+  const [expandedDay, setExpandedDay] = useState(null);
 
   useEffect(() => {
     setLoading(true);
@@ -157,9 +158,22 @@ function App() {
         icon: getWeatherIcon(firstEntry.weather[0]?.description),
         maxTemp,
         minTemp,
-        isFirst: idx === 0
+        isFirst: idx === 0,
+        hourlyData: dayData.map(hour => ({
+          time: translateEpochTime(hour.dt),
+          temp: Math.round(hour.main.temp),
+          feelsLike: Math.round(hour.main.feels_like),
+          description: hour.weather[0]?.description,
+          icon: getWeatherIcon(hour.weather[0]?.description),
+          wind: Math.round(hour.wind.speed),
+          humidity: hour.main.humidity
+        }))
       };
     });
+  };
+
+  const toggleDayExpanded = (idx) => {
+    setExpandedDay(expandedDay === idx ? null : idx);
   };
 
   return (
@@ -326,22 +340,53 @@ function App() {
               ))
             ) : (
               getDailyForecast().map((day, idx) => (
-                <div 
-                  key={idx} 
-                  className={`asymmetric-radius p-4 flex items-center justify-between ${
-                    day.isFirst ? 'bg-surface-container-highest' : 'bg-surface-container-low'
-                  }`}
-                >
-                  <div className="flex items-center gap-4">
-                    <span className={`font-medium w-10 ${day.isFirst ? 'text-tertiary' : ''}`}>
-                      {day.day}
-                    </span>
-                    <span className="material-symbols-outlined text-secondary">{day.icon}</span>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <span className="text-on-surface font-semibold">{day.maxTemp}°</span>
-                    <span className="text-on-surface-variant text-sm">{day.minTemp}°</span>
-                  </div>
+                <div key={idx} className="space-y-0">
+                  <button 
+                    onClick={() => toggleDayExpanded(idx)}
+                    className={`asymmetric-radius p-4 flex items-center justify-between w-full text-left transition-colors ${
+                      day.isFirst ? 'bg-surface-container-highest' : 'bg-surface-container-low'
+                    } ${expandedDay === idx ? 'rounded-b-none' : ''}`}
+                  >
+                    <div className="flex items-center gap-4">
+                      <span className={`font-medium w-10 ${day.isFirst ? 'text-tertiary' : ''}`}>
+                        {day.day}
+                      </span>
+                      <span className="material-symbols-outlined text-secondary">{day.icon}</span>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <span className="text-on-surface font-semibold">{day.maxTemp}°</span>
+                      <span className="text-on-surface-variant text-sm">{day.minTemp}°</span>
+                      <span className={`material-symbols-outlined text-on-surface-variant text-lg transition-transform duration-200 ${expandedDay === idx ? 'rotate-180' : ''}`}>
+                        expand_more
+                      </span>
+                    </div>
+                  </button>
+                  {expandedDay === idx && (
+                    <div className={`bg-surface-container p-4 rounded-b-3xl space-y-3 ${
+                      day.isFirst ? 'border-t border-outline-variant/20' : ''
+                    }`}>
+                      {day.hourlyData.map((hour, hIdx) => (
+                        <div key={hIdx} className="flex items-center justify-between py-2 border-b border-outline-variant/10 last:border-b-0">
+                          <div className="flex items-center gap-3">
+                            <span className="text-sm text-on-surface-variant w-12">{hour.time}</span>
+                            <span className="material-symbols-outlined text-secondary text-lg">{hour.icon}</span>
+                            <span className="text-sm text-on-surface-variant capitalize hidden sm:inline">{hour.description}</span>
+                          </div>
+                          <div className="flex items-center gap-4">
+                            <span className="text-on-surface font-medium">{hour.temp}°</span>
+                            <div className="flex items-center gap-1 text-on-surface-variant text-xs">
+                              <span className="material-symbols-outlined text-sm">air</span>
+                              <span>{hour.wind}{distanceTime}</span>
+                            </div>
+                            <div className="flex items-center gap-1 text-on-surface-variant text-xs hidden sm:flex">
+                              <span className="material-symbols-outlined text-sm">humidity_percentage</span>
+                              <span>{hour.humidity}%</span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               ))
             )}
