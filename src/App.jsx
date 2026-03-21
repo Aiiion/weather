@@ -82,10 +82,11 @@ function App() {
   const getPermissonStatus = () =>
     navigator.permissions.query({ name: "geolocation" }).then((permission) => {
       setPermissionStatus(permission.state);
+      return permission.state;
     });
   const printNoLocationError = () =>
-    getPermissonStatus().then(() => {
-      if (permissionStatus === "denied") setCity("Location permission denied");
+    getPermissonStatus().then((state) => {
+      if (state === "denied") setCity("Location permission denied");
       else setCity("Unable to retrieve your location");
     });
 
