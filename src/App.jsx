@@ -239,28 +239,28 @@ function App() {
         <section className="flex flex-col items-center mb-16 lg:mb-20">
           {loading ? (
             <div className="h-36 w-48 bg-surface-container-low rounded-xl animate-pulse"></div>
-          ) : (
+          ) : weather ? (
             <div className="relative">
               <span className="text-[clamp(6rem,20vw,9rem)] font-medium text-primary tracking-tighter leading-none">
-                {Math.floor(weather?.main.temp ?? 0)}°
+                {Math.floor(weather.main.temp)}°
               </span>
               <div className="absolute -top-4 -right-8">
                 <span className="material-symbols-outlined text-secondary text-5xl">
-                  {getWeatherIcon(weather?.weather[0]?.description)}
+                  {getWeatherIcon(weather.weather[0]?.description)}
                 </span>
               </div>
             </div>
-          )}
+          ) : null}
           <p className="font-['Inter'] text-[0.6875rem] font-bold uppercase tracking-[0.05em] text-on-surface-variant mt-4">
             {loading ? (
               <span className="inline-block h-4 w-24 bg-surface-container-low rounded animate-pulse"></span>
-            ) : (
+            ) : weather ? (
               <>
-                feels like {Math.floor(weather?.main.feels_like ?? 0)}°
+                feels like {Math.floor(weather.main.feels_like)}°
                 {precipitation > 0 && (
                   <span className="ml-2">
                     • {precipitation} mm/h
-                    {weather?.snow?.["1h"] && (
+                    {weather.snow?.["1h"] && (
                       <Tooltip
                         text="While snow is measured in mm, 1 mm of snow is approximately equivalent to 1 cm of snow depth."
                         ariaLabel="Snow measurement info"
@@ -269,7 +269,7 @@ function App() {
                   </span>
                 )}
               </>
-            )}
+            ) : null}
           </p>
           {!loading && weather?.weather[0]?.description && (
             <p className="font-['Inter'] text-sm text-secondary mt-2 capitalize">
@@ -289,9 +289,9 @@ function App() {
             <div className="text-xl font-semibold text-on-surface">
               {loading ? (
                 <span className="inline-block h-6 w-16 bg-surface-container rounded animate-pulse"></span>
-              ) : (
-                `${weather?.wind.speed}${distanceTime}`
-              )}
+              ) : weather ? (
+                `${weather.wind.speed}${distanceTime}`
+              ) : '--'}
             </div>
           </div>
 
@@ -304,9 +304,9 @@ function App() {
             <div className="text-xl font-semibold text-on-surface">
               {loading ? (
                 <span className="inline-block h-6 w-12 bg-surface-container rounded animate-pulse"></span>
-              ) : (
-                `${weather?.main.humidity}%`
-              )}
+              ) : weather ? (
+                `${weather.main.humidity}%`
+              ) : '--'}
             </div>
           </div>
 
@@ -322,18 +322,18 @@ function App() {
                 <span className="text-xl font-semibold text-on-surface">
                   {loading ? (
                     <span className="inline-block h-6 w-14 bg-surface-container-low rounded animate-pulse"></span>
-                  ) : (
-                    translateEpochTime(weather?.sys.sunrise)
-                  )}
+                  ) : weather ? (
+                    translateEpochTime(weather.sys.sunrise)
+                  ) : '--'}
                 </span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-xl font-semibold text-on-surface">
                   {loading ? (
                     <span className="inline-block h-6 w-14 bg-surface-container-low rounded animate-pulse"></span>
-                  ) : (
-                    translateEpochTime(weather?.sys.sunset)
-                  )}
+                  ) : weather ? (
+                    translateEpochTime(weather.sys.sunset)
+                  ) : '--'}
                 </span>
                 <span className="material-symbols-outlined text-secondary">nights_stay</span>
               </div>
