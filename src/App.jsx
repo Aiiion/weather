@@ -15,16 +15,50 @@ const createApiUrl = ({ lat, lon }, measureValue) => {
 const toJSON = (response) => response.json();
 
 // Weather condition to icon mapping
-const getWeatherIcon = (description) => {
+// Accepts weather object with icon code (e.g., "01d") or falls back to description
+const getWeatherIcon = (weatherData, isDay = true) => {
+  // If passed a string (description only), use legacy fallback
+  if (typeof weatherData === "string") {
+    return getWeatherIconFromDescription(weatherData, isDay);
+  }
+
+  // Prefer icon code from API (e.g., "01d", "10n")
+  const iconCode = weatherData?.icon;
+  if (iconCode) {
+    const isDayFromIcon = iconCode.endsWith("d");
+    const code = iconCode.slice(0, 2);
+    
+    // Map OpenWeatherMap icon codes to Material Symbols
+    switch (code) {
+      case "01": return isDayFromIcon ? "wb_sunny" : "nights_stay";
+      case "02": return isDayFromIcon ? "partly_cloudy_day" : "partly_cloudy_night";
+      case "03": return "cloudy";
+      case "04": return "cloudy";
+      case "09": return "rainy";
+      case "10": return "rainy";
+      case "11": return "thunderstorm";
+      case "13": return "weather_snowy";
+      case "50": return "foggy";
+      default: break;
+    }
+  }
+
+  // Fall back to description parsing
+  return getWeatherIconFromDescription(weatherData?.description, isDay);
+};
+
+const getWeatherIconFromDescription = (description, isDay = true) => {
   const desc = description?.toLowerCase() || "";
-  if (desc.includes("clear") || desc.includes("sunny")) return "wb_sunny";
-  if (desc.includes("cloud") && desc.includes("partly")) return "partly_cloudy_day";
-  if (desc.includes("cloud")) return "cloudy";
-  if (desc.includes("rain") || desc.includes("drizzle")) return "rainy";
+  // Check thunder/storm before rain/drizzle to handle "thunderstorm with rain" correctly
   if (desc.includes("thunder") || desc.includes("storm")) return "thunderstorm";
   if (desc.includes("snow")) return "weather_snowy";
+  if (desc.includes("rain") || desc.includes("drizzle")) return "rainy";
   if (desc.includes("mist") || desc.includes("fog") || desc.includes("haze")) return "foggy";
-  return "wb_sunny";
+  if (desc.includes("cloud") && desc.includes("partly")) return isDay ? "partly_cloudy_day" : "partly_cloudy_night";
+  if (desc.includes("cloud")) return "cloudy";
+  if (desc.includes("clear") || desc.includes("sunny")) return isDay ? "wb_sunny" : "nights_stay";
+  // Neutral default when context is unknown
+  return "thermostat";
 };
 
 function App() {
@@ -151,12 +185,14 @@ function App() {
   const getDailyForecast = () => {
     return forecast.filter(dayData => dayData.length > 0).map((dayData, idx) => {
       const firstEntry = dayData[0];
+      // Prefer 13:00 timeslot for day icon (more representative), fallback to first
+      const noonEntry = dayData.find(h => new Date(h.dt * 1000).getHours() === 13) || firstEntry;
       const temps = dayData.map(h => h.main.temp);
       const maxTemp = Math.round(Math.max(...temps));
       const minTemp = Math.round(Math.min(...temps));
       return {
         day: translateEpochDayShort(firstEntry.dt),
-        icon: getWeatherIcon(firstEntry.weather[0]?.description),
+        icon: getWeatherIcon(noonEntry.weather[0]),
         maxTemp,
         minTemp,
         isFirst: idx === 0,
@@ -165,7 +201,7 @@ function App() {
           temp: Math.round(hour.main.temp),
           feelsLike: Math.round(hour.main.feels_like),
           description: hour.weather[0]?.description,
-          icon: getWeatherIcon(hour.weather[0]?.description),
+          icon: getWeatherIcon(hour.weather[0]),
           wind: Math.round(hour.wind.speed),
           humidity: hour.main.humidity
         }))
@@ -246,7 +282,7 @@ function App() {
               </span>
               <div className="absolute -top-4 -right-8">
                 <span className="material-symbols-outlined text-secondary text-5xl">
-                  {getWeatherIcon(weather.weather[0]?.description)}
+                  {getWeatherIcon(weather.weather[0])}
                 </span>
               </div>
             </div>
@@ -396,7 +432,10 @@ function App() {
                             <span className="text-sm text-on-surface-variant capitalize hidden sm:inline">{hour.description}</span>
                           </div>
                           <div className="flex items-center gap-4">
-                            <span className="text-on-surface font-medium">{hour.temp}°</span>
+                            <div className="flex flex-col items-end">
+                              <span className="text-on-surface font-medium">{hour.temp}°</span>
+                              <span className="text-on-surface-variant text-xs">Feels {hour.feelsLike}°</span>
+                            </div>
                             <div className="flex items-center gap-1 text-on-surface-variant text-xs">
                               <span className="material-symbols-outlined text-sm">air</span>
                               <span>{hour.wind}{distanceTime}</span>
