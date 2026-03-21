@@ -3,7 +3,7 @@ import WarningIcon from "./components/WarningIcon/WarningIcon.jsx";
 import WarningModal from "./components/WarningModal/WarningModal.jsx";
 import Tooltip from "./components/Tooltip/Tooltip.jsx";
 import { useEffect, useState } from "react";
-import { translateEpochTime, translateEpochDay, translateEpochDayShort } from "./helpers.js";
+import { translateEpochTime, translateEpochDayShort } from "./helpers.js";
 
 const API_BASE_URL = `https://api.alexbierhance.com/weather/aggregate?`;
 
