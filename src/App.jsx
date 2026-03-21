@@ -41,7 +41,7 @@ function App() {
   const [isWarningOpen, setIsWarningOpen] = useState(false);
   const [permissionStatus, setPermissionStatus] = useState("pending");
   const [precipitation, setPrecipitation] = useState(0);
-  const [activeNav, setActiveNav] = useState("weather");
+  // const [activeNav, setActiveNav] = useState("weather");
   const [expandedDay, setExpandedDay] = useState(null);
 
   useEffect(() => {
