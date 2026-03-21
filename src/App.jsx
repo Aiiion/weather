@@ -450,14 +450,14 @@ function App() {
                       <span className="material-symbols-outlined text-secondary">{day.icon}</span>
                     </div>
                     <div className="flex items-center gap-4">
-                      <span className="text-on-surface font-semibold">{day.maxTemp}°</span>
-                      <span className="text-on-surface-variant text-sm">{day.minTemp}°</span>
                       {day.precipitation > 0 && (
                         <div className="flex items-center gap-1 text-on-surface-variant text-xs">
                           <span className="material-symbols-outlined text-sm">water_drop</span>
                           <span>{day.precipitation}mm</span>
                         </div>
                       )}
+                      <span className="text-on-surface font-semibold">{day.maxTemp}°</span>
+                      <span className="text-on-surface-variant text-sm">{day.minTemp}°</span>
                       <span className={`material-symbols-outlined text-on-surface-variant text-lg transition-transform duration-200 ${expandedDay === idx ? 'rotate-180' : ''}`}>
                         expand_more
                       </span>
@@ -475,10 +475,12 @@ function App() {
                             <span className="text-sm text-on-surface-variant capitalize hidden sm:inline">{hour.description}</span>
                           </div>
                           <div className="flex items-center gap-4">
-                            <div className="flex flex-col items-end">
-                              <span className="text-on-surface font-medium">{hour.temp}°</span>
-                              <span className="text-on-surface-variant text-xs">Feels {hour.feelsLike}°</span>
-                            </div>
+                            {hour.precipitation > 0 && (
+                              <div className="flex items-center gap-1 text-on-surface-variant text-xs">
+                                <span className="material-symbols-outlined text-sm">water_drop</span>
+                                <span>{Math.round(hour.precipitation * 10) / 10}mm</span>
+                              </div>
+                            )}
                             <div className="flex items-center gap-1 text-on-surface-variant text-xs">
                               <span className="material-symbols-outlined text-sm">air</span>
                               <span>{hour.wind}{distanceTime}</span>
@@ -487,12 +489,11 @@ function App() {
                               <span className="material-symbols-outlined text-sm">humidity_percentage</span>
                               <span>{hour.humidity}%</span>
                             </div>
-                            {hour.precipitation > 0 && (
-                              <div className="flex items-center gap-1 text-on-surface-variant text-xs">
-                                <span className="material-symbols-outlined text-sm">water_drop</span>
-                                <span>{Math.round(hour.precipitation * 10) / 10}mm</span>
-                              </div>
-                            )}
+                            
+                            <div className="flex flex-col items-end">
+                              <span className="text-on-surface font-medium">{hour.temp}°</span>
+                              <span className="text-on-surface-variant text-xs">Feels {hour.feelsLike}°</span>
+                            </div>
                           </div>
                         </div>
                       ))}
