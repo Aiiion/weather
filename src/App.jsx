@@ -77,7 +77,25 @@ function App() {
   const [precipitation, setPrecipitation] = useState(0);
   // const [activeNav, setActiveNav] = useState("weather");
   const [expandedDay, setExpandedDay] = useState(null);
+  const [activeTooltip, setActiveTooltip] = useState(null);
   const abortControllerRef = useRef(null);
+
+  // Close tooltip when clicking outside or pressing Escape
+  useEffect(() => {
+    if (!activeTooltip) return;
+    const handleClick = () => setActiveTooltip(null);
+    const handleKey = (e) => { if (e.key === 'Escape') setActiveTooltip(null); };
+    // Delay to avoid immediate close from the same click
+    const timer = setTimeout(() => {
+      document.addEventListener('click', handleClick);
+      document.addEventListener('keydown', handleKey);
+    }, 0);
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener('click', handleClick);
+      document.removeEventListener('keydown', handleKey);
+    };
+  }, [activeTooltip]);
 
   useEffect(() => {
     // Cancel any in-flight request
@@ -247,6 +265,7 @@ function App() {
   };
 
   const toggleDayExpanded = (idx) => {
+    setActiveTooltip(null);
     setExpandedDay(expandedDay === idx ? null : idx);
   };
 
@@ -471,7 +490,19 @@ function App() {
                         <div key={`${day.day}-${hour.time}`} className="flex items-center justify-between py-2 border-b border-outline-variant/10 last:border-b-0">
                           <div className="flex items-center gap-3">
                             <span className="text-sm text-on-surface-variant w-12">{hour.time}</span>
-                            <span className="material-symbols-outlined text-secondary text-lg">{hour.icon}</span>
+                            <button
+                              type="button"
+                              className="relative"
+                              onClick={() => setActiveTooltip(activeTooltip === `${idx}-${hIdx}` ? null : `${idx}-${hIdx}`)}
+                              aria-label={`Weather: ${hour.description}`}
+                            >
+                              <span className="material-symbols-outlined text-secondary text-lg cursor-pointer hover:text-primary transition-colors">{hour.icon}</span>
+                              {activeTooltip === `${idx}-${hIdx}` && hour.description && (
+                                <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 z-50 bg-surface-container-highest text-on-surface text-xs px-3 py-2 rounded-lg shadow-lg whitespace-nowrap capitalize">
+                                  {hour.description}
+                                </div>
+                              )}
+                            </button>
                             <span className="text-sm text-on-surface-variant capitalize hidden sm:inline">{hour.description}</span>
                           </div>
                           <div className="flex items-center gap-4">
