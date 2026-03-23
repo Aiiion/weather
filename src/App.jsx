@@ -3,7 +3,7 @@ import WarningIcon from "./components/WarningIcon/WarningIcon.jsx";
 import WarningModal from "./components/WarningModal/WarningModal.jsx";
 import Tooltip from "./components/Tooltip/Tooltip.jsx";
 import { useEffect, useState, useRef } from "react";
-import { translateEpochTime, translateEpochDayShort } from "./helpers.js";
+import { translateEpochTime, translateEpochDayShort, getWeatherIcon, getWeatherIconFromDescription } from "./helpers.js";
 
 const API_BASE_URL = `https://api.alexbierhance.com/weather/aggregate?`;
 
@@ -14,52 +14,7 @@ const createApiUrl = ({ lat, lon }, measureValue) => {
 
 const toJSON = (response) => response.json();
 
-// Weather condition to icon mapping
-// Accepts weather object with icon code (e.g., "01d") or falls back to description
-const getWeatherIcon = (weatherData, isDay = true) => {
-  // If passed a string (description only), use legacy fallback
-  if (typeof weatherData === "string") {
-    return getWeatherIconFromDescription(weatherData, isDay);
-  }
-
-  // Prefer icon code from API (e.g., "01d", "10n")
-  const iconCode = weatherData?.icon;
-  if (iconCode) {
-    const isDayFromIcon = iconCode.endsWith("d");
-    const code = iconCode.slice(0, 2);
-    
-    // Map OpenWeatherMap icon codes to Material Symbols
-    switch (code) {
-      case "01": return isDayFromIcon ? "wb_sunny" : "nights_stay";
-      case "02": return isDayFromIcon ? "partly_cloudy_day" : "partly_cloudy_night";
-      case "03": return "cloudy";
-      case "04": return "cloudy";
-      case "09": return "rainy";
-      case "10": return "rainy";
-      case "11": return "thunderstorm";
-      case "13": return "weather_snowy";
-      case "50": return "foggy";
-      default: break;
-    }
-  }
-
-  // Fall back to description parsing
-  return getWeatherIconFromDescription(weatherData?.description, isDay);
-};
-
-const getWeatherIconFromDescription = (description, isDay = true) => {
-  const desc = description?.toLowerCase() || "";
-  // Check thunder/storm before rain/drizzle to handle "thunderstorm with rain" correctly
-  if (desc.includes("thunder") || desc.includes("storm")) return "thunderstorm";
-  if (desc.includes("snow")) return "weather_snowy";
-  if (desc.includes("rain") || desc.includes("drizzle")) return "rainy";
-  if (desc.includes("mist") || desc.includes("fog") || desc.includes("haze")) return "foggy";
-  if (desc.includes("cloud") && desc.includes("partly")) return isDay ? "partly_cloudy_day" : "partly_cloudy_night";
-  if (desc.includes("cloud")) return "cloudy";
-  if (desc.includes("clear") || desc.includes("sunny")) return isDay ? "wb_sunny" : "nights_stay";
-  // Neutral default when context is unknown
-  return "thermostat";
-};
+// Weather condition icons are provided by helpers: `getWeatherIcon` and `getWeatherIconFromDescription`.
 
 function App() {
   const [city, setCity] = useState();
