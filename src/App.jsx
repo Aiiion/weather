@@ -30,7 +30,7 @@ function App() {
   const [isWarningOpen, setIsWarningOpen] = useState(false);
   const [permissionStatus, setPermissionStatus] = useState("pending");
   const [precipitation, setPrecipitation] = useState(0);
-  // const [activeNav, setActiveNav] = useState("weather");
+  const [activeNav, setActiveNav] = useState("weather");
   const [expandedDay, setExpandedDay] = useState(null);
   const [activeTooltip, setActiveTooltip] = useState(null);
   const abortControllerRef = useRef(null);
@@ -228,6 +228,7 @@ function App() {
     <div className="min-h-screen bg-background flex flex-col overflow-x-hidden">
       {/* TopAppBar */}
       <header className="bg-background flex justify-between items-center px-4 py-4 w-full fixed top-0 z-50 box-border">
+        <div className="max-w-[1200px] mx-auto w-full flex justify-between items-center">
         <div className="flex items-center gap-2">
           <span className="material-symbols-outlined text-primary">location_on</span>
           {loading ? (
@@ -279,9 +280,10 @@ function App() {
       </button>
     </div>
   )}
-</header>
+        </div>
+      </header>
 
-      <main className="px-4 pt-20 pb-4 w-full box-border flex-1">
+      <main className="px-4 pt-20 pb-4 w-full box-border flex-1 max-w-[1200px] mx-auto">
         {/* Hero Temperature Section */}
         <section className="flex flex-col items-center mb-16 lg:mb-20">
           {loading ? (
@@ -493,7 +495,8 @@ function App() {
       </main>
 
       {/* BottomNavBar */}
-      {/* <nav className="sticky bottom-0 z-50 flex justify-around items-center px-4 pb-6 pt-4 bg-background/60 backdrop-blur-xl rounded-t-3xl shadow-[0_-10px_30px_rgba(0,0,0,0.08)] w-full box-border">
+      <nav className="sticky bottom-0 z-50 flex justify-around items-center px-4 pb-6 pt-4 bg-background/60 backdrop-blur-xl rounded-t-3xl shadow-[0_-10px_30px_rgba(0,0,0,0.08)] w-full box-border">
+        <div className="max-w-[1200px] mx-auto w-full flex justify-around items-center">
         <button 
           onClick={() => setActiveNav("weather")}
           className={`flex flex-col items-center justify-center p-3 rounded-2xl transition-all duration-200 active:scale-90 ${
@@ -535,7 +538,8 @@ function App() {
         >
           <span className="material-symbols-outlined">settings</span>
         </button>
-      </nav> */}
+        </div>
+      </nav>
 
       {/* Warning Modal */}
       <WarningModal
