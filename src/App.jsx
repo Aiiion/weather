@@ -31,6 +31,7 @@ function App() {
   const [isWarningOpen, setIsWarningOpen] = useState(false);
   const [permissionStatus, setPermissionStatus] = useState("pending");
   const [precipitation, setPrecipitation] = useState(0);
+  const [pollution, setPollution] = useState(null);
   const [activeNav, setActiveNav] = useState("weather");
   const abortControllerRef = useRef(null);
 
@@ -135,6 +136,9 @@ function App() {
       setLoading(false);
       setPrecipitation(data.currentWeather.precipitation?.amount || 0);
     }
+    if (data.currentPollution) {
+      setPollution(data.currentPollution);
+    }
     if (data.forecastWeather?.list) {
       setForecast(Object.values(data.forecastWeather.list));
     }
@@ -238,6 +242,7 @@ function App() {
             forecast={forecast}
             distanceTime={distanceTime}
             measure={measure}
+            pollution={pollution}
           />
         )}
       </main>

@@ -1,6 +1,53 @@
 import { translateEpochTime, translateEpochDayShort, getWeatherIcon } from "../helpers.js";
 
-function DetailsPage({ loading, weather, forecast, distanceTime }) {
+const AQI_LABELS = ["", "Good", "Fair", "Moderate", "Poor", "Very Poor"];
+const AQI_DESCRIPTIONS = [
+  "",
+  "Air quality is satisfactory, and air pollution poses little or no risk.",
+  "Air quality is acceptable. There may be a moderate health concern for a very small number of people.",
+  "Members of sensitive groups may experience health effects. The general public is less likely to be affected.",
+  "Everyone may begin to experience health effects. Members of sensitive groups may experience more serious effects.",
+  "Health alert: everyone may experience more serious health effects.",
+];
+
+function AirQualityCard({ loading, pollution }) {
+  const entry = pollution?.list?.[0];
+  const aqi = entry?.main?.aqi ?? null;
+  const label = aqi != null ? AQI_LABELS[aqi] : null;
+  const description = aqi != null ? AQI_DESCRIPTIONS[aqi] : null;
+  // Bar width: aqi 1-5 maps to 20%-100%
+  const barWidth = aqi != null ? `${aqi * 20}%` : "0%";
+
+  return (
+    <section className="p-6 bg-surface-container-high asymmetric-radius flex flex-col md:flex-row md:items-center justify-between gap-6 border border-outline-variant/10">
+      <div className="space-y-1">
+        <span className="text-on-surface-variant font-['Inter'] text-[0.6875rem] font-bold uppercase tracking-[0.05em]">Air Quality</span>
+        <div className="text-2xl font-bold text-tertiary">
+          {loading ? (
+            <span className="inline-block h-7 w-28 bg-surface-container rounded animate-pulse" />
+          ) : label ? (
+            `${aqi} - ${label}`
+          ) : (
+            "N/A"
+          )}
+        </div>
+        <p className="text-on-surface-variant text-sm max-w-xs">
+          {loading ? (
+            <span className="inline-block h-4 w-48 bg-surface-container rounded animate-pulse" />
+          ) : description ?? "Air quality data is not available from the current source."}
+        </p>
+      </div>
+      <div className="relative w-32 h-2 bg-surface-container-lowest rounded-full overflow-hidden flex-shrink-0">
+        <div
+          className="absolute left-0 top-0 h-full bg-tertiary transition-all duration-500"
+          style={{ width: barWidth }}
+        />
+      </div>
+    </section>
+  );
+}
+
+function DetailsPage({ loading, weather, forecast, distanceTime, measure, pollution }) {
   // Build 3-day summary from forecast data
   const getDailyForecast = () => {
     if (!forecast || forecast.length === 0) return [];
@@ -64,6 +111,21 @@ function DetailsPage({ loading, weather, forecast, distanceTime }) {
   const pressure = weather?.pressure ?? null;
   const sunrise = weather?.sunrise ?? null;
   const sunset = weather?.sunset ?? null;
+  const visibilityM = weather?.visibility ?? null; // meters
+  const visibilityFormatted = visibilityM != null
+    ? measure === "°F"
+      ? `${(visibilityM / 1609.34).toFixed(1)} mi`
+      : `${(visibilityM / 1000).toFixed(1)} km`
+    : null;
+  const visibilityLabel = visibilityM != null
+    ? visibilityM >= 10000
+      ? "Perfectly clear"
+      : visibilityM >= 5000
+      ? "Good"
+      : visibilityM >= 2000
+      ? "Moderate"
+      : "Poor"
+    : null;
 
   // Max/min across today's forecast
   const todayData = dailyForecast[0];
@@ -153,15 +215,19 @@ function DetailsPage({ loading, weather, forecast, distanceTime }) {
             </div>
           </div>
 
-          {/* Visibility — not in API */}
+          {/* Visibility */}
           <div className="p-5 bg-surface-container-low asymmetric-radius flex flex-col justify-between min-h-[120px]">
             <div className="flex items-center gap-2">
               <span className="material-symbols-outlined text-[1.25rem] text-on-surface-variant">visibility</span>
               <span className="text-on-surface-variant font-['Inter'] text-[0.6875rem] font-bold uppercase tracking-[0.05em]">Visibility</span>
             </div>
             <div>
-              <div className="text-[1.5rem] font-semibold text-on-surface">N/A</div>
-              <div className="text-on-tertiary-container text-[0.75rem]">Not available</div>
+              <div className="text-[1.5rem] font-semibold text-on-surface">
+                {loading ? skeleton() : visibilityFormatted ?? "N/A"}
+              </div>
+              <div className="text-on-tertiary-container text-[0.75rem]">
+                {!loading && visibilityLabel}
+              </div>
             </div>
           </div>
 
@@ -217,17 +283,8 @@ function DetailsPage({ loading, weather, forecast, distanceTime }) {
         </div>
       </section>
 
-      {/* Air Quality — not in API */}
-      <section className="p-6 bg-surface-container-high asymmetric-radius flex flex-col md:flex-row md:items-center justify-between gap-6 border border-outline-variant/10">
-        <div className="space-y-1">
-          <span className="text-on-surface-variant font-['Inter'] text-[0.6875rem] font-bold uppercase tracking-[0.05em]">Air Quality</span>
-          <div className="text-2xl font-bold text-tertiary">N/A</div>
-          <p className="text-on-surface-variant text-sm max-w-xs">Air quality data is not available from the current source.</p>
-        </div>
-        <div className="relative w-32 h-2 bg-surface-container-lowest rounded-full overflow-hidden">
-          <div className="absolute left-0 top-0 h-full w-0 bg-tertiary" />
-        </div>
-      </section>
+      {/* Air Quality */}
+      <AirQualityCard loading={loading} pollution={pollution} />
 
       {/* 3-Day Condition Tracking Chart */}
       <section className="space-y-6">
