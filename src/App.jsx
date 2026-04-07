@@ -231,7 +231,15 @@ function App() {
             distanceTime={distanceTime}
           />
         )}
-        {activeNav === "details" && <DetailsPage />}
+        {activeNav === "details" && (
+          <DetailsPage
+            loading={loading}
+            weather={weather}
+            forecast={forecast}
+            distanceTime={distanceTime}
+            measure={measure}
+          />
+        )}
       </main>
 
       {/* BottomNavBar */}
