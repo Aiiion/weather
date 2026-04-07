@@ -126,6 +126,18 @@ function DetailsPage({ loading, weather, forecast, distanceTime, measure, pollut
       ? "Moderate"
       : "Poor"
     : null;
+  const uvIndex = weather?.uv ?? null;
+  const uvLabel = uvIndex != null
+    ? uvIndex >= 11
+      ? "Extreme"
+      : uvIndex >= 8
+      ? "Very High"
+      : uvIndex >= 6
+      ? "High"
+      : uvIndex >= 3
+      ? "Moderate"
+      : "Low"
+    : null;
 
   // Max/min across today's forecast
   const todayData = dailyForecast[0];
@@ -179,15 +191,19 @@ function DetailsPage({ loading, weather, forecast, distanceTime, measure, pollut
       <section className="space-y-6">
         <h3 className="text-on-surface font-['Inter'] text-base font-semibold">Atmospheric Details</h3>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          {/* UV Index — not in API, shown as N/A */}
+          {/* UV Index */}
           <div className="p-5 bg-surface-container-low asymmetric-radius flex flex-col justify-between min-h-[120px]">
             <div className="flex items-center gap-2">
               <span className="material-symbols-outlined text-[1.25rem] text-on-surface-variant">light_mode</span>
               <span className="text-on-surface-variant font-['Inter'] text-[0.6875rem] font-bold uppercase tracking-[0.05em]">UV Index</span>
             </div>
             <div>
-              <div className="text-[1.5rem] font-semibold text-on-surface">N/A</div>
-              <div className="text-on-tertiary-container text-[0.75rem]">Not available</div>
+              <div className="text-[1.5rem] font-semibold text-on-surface">
+                {loading ? skeleton() : uvIndex != null ? uvIndex : "N/A"}
+              </div>
+              <div className="text-on-tertiary-container text-[0.75rem]">
+                {!loading && uvLabel ? uvLabel : !loading ? "Not available" : ""}
+              </div>
             </div>
           </div>
 
