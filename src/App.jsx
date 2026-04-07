@@ -6,7 +6,7 @@ import DetailsPage from "./pages/DetailsPage.jsx";
 import { useEffect, useState, useRef } from "react";
 import { getWeatherIcon } from "./helpers.js";
 
-const API_BASE_URL = `https://api.alexbierhance.com/weather/aggregate?`;
+const API_BASE_URL = `https://api.alexbierhance.com/v1/weather?days=5&`;
 
 const createApiUrl = ({ lat, lon }, measureValue) => {
   const units = measureValue == "°C" ? "metric" : "imperial";
@@ -133,14 +133,10 @@ function App() {
       setWeather(data.currentWeather);
       setCity(data.currentWeather.name);
       setLoading(false);
-      setPrecipitation(
-        data.currentWeather?.rain?.["1h"] ??
-          data.currentWeather?.snow?.["1h"] ??
-          0,
-      );
+      setPrecipitation(data.currentWeather.precipitation.amount);
     }
-    if (data.forecastWeather) {
-      setForecast(Object.values(data.forecastWeather));
+    if (data.forecastWeather?.list) {
+      setForecast(Object.values(data.forecastWeather.list));
     }
     if (
       data.weatherWarnings?.severity &&

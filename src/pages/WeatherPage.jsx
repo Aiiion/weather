@@ -15,28 +15,35 @@ function WeatherPage({ loading, weather, precipitation, forecast, distanceTime }
         const hour = new Date(h.dt * 1000).getHours();
         return hour >= 12 && hour <= 15;
       }) || firstEntry;
-      const temps = dayData.map(h => h.main.temp);
+      const temps = dayData.map(h => h.temperature.temp);
       const maxTemp = Math.round(Math.max(...temps));
       const minTemp = Math.round(Math.min(...temps));
       // Calculate total precipitation for the day
-      const totalPrecipitation = dayData.reduce((sum, h) => sum + (h.rain?.["3h"] ?? h.snow?.["3h"] ?? 0), 0);
+      const totalPrecipitation = dayData.reduce((sum, h) => sum + (h.precipitation?.amount || 0), 0);
+      
+      // Create weather object for icon function
+      const noonWeatherObj = { main: noonEntry.weather, description: noonEntry.description };
+      
       return {
         day: translateEpochDayShort(firstEntry.dt),
-        icon: getWeatherIcon(noonEntry.weather[0]),
+        icon: getWeatherIcon(noonWeatherObj),
         maxTemp,
         minTemp,
         precipitation: Math.round(totalPrecipitation * 10) / 10,
         isFirst: idx === 0,
-        hourlyData: dayData.map(hour => ({
-          time: translateEpochTime(hour.dt),
-          temp: Math.round(hour.main.temp),
-          feelsLike: Math.round(hour.main.feels_like),
-          description: hour.weather[0]?.description,
-          icon: getWeatherIcon(hour.weather[0]),
-          wind: Math.round(hour.wind.speed),
-          humidity: hour.main.humidity,
-          precipitation: hour.rain?.["3h"] ?? hour.snow?.["3h"] ?? 0
-        }))
+        hourlyData: dayData.map(hour => {
+          const weatherObj = { main: hour.weather, description: hour.description };
+          return {
+            time: translateEpochTime(hour.dt),
+            temp: Math.round(hour.temperature.temp),
+            feelsLike: Math.round(hour.temperature.feels_like),
+            description: hour.description,
+            icon: getWeatherIcon(weatherObj),
+            wind: Math.round(hour.wind.speed),
+            humidity: hour.humidity,
+            precipitation: hour.precipitation?.amount || 0
+          };
+        })
       };
     });
   };
