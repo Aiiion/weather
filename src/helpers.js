@@ -101,10 +101,45 @@ export const getWeatherIcon = (weatherData, isDay = true) => {
     return getWeatherIconFromDescription(weatherData, isDay);
   }
 
-  // Prefer icon code from API (e.g., "01d", "10n")
+  // Try to determine day/night from icon URL if available
+  let isDayFromIcon = isDay;
+  if (weatherData?.icon && typeof weatherData.icon === "string") {
+    // Icon URL format: "//cdn.weatherapi.com/weather/64x64/day/116.png"
+    isDayFromIcon = weatherData.icon.includes("/day/");
+  }
+
+  // Prefer using the weather/description fields for better accuracy
+  const weather = weatherData?.weather?.toLowerCase() || "";
+  const description = weatherData?.description?.toLowerCase() || "";
+  
+  // Check for specific weather types based on the main weather field and description
+  if (weather.includes("thunder") || description.includes("thunder") || description.includes("storm")) {
+    return "thunderstorm";
+  }
+  if (weather.includes("snow") || description.includes("snow")) {
+    return "weather_snowy";
+  }
+  if (weather.includes("rain") || weather.includes("drizzle") || 
+      description.includes("rain") || description.includes("drizzle")) {
+    return "rainy";
+  }
+  if (weather.includes("mist") || weather.includes("fog") || 
+      description.includes("mist") || description.includes("fog") || description.includes("haze")) {
+    return "foggy";
+  }
+  if (weather === "clouds" || description.includes("cloud")) {
+    if (description.includes("few") || description.includes("partly") || description.includes("scattered")) {
+      return isDayFromIcon ? "partly_cloudy_day" : "partly_cloudy_night";
+    }
+    return "cloudy";
+  }
+  if (weather === "clear" || description.includes("clear") || description.includes("sunny")) {
+    return isDayFromIcon ? "wb_sunny" : "nights_stay";
+  }
+
+  // Legacy: Try old icon code format (e.g., "01d", "10n") if present
   const iconCode = weatherData?.icon;
-  if (iconCode) {
-    const isDayFromIcon = iconCode.endsWith("d");
+  if (iconCode && typeof iconCode === "string" && iconCode.length <= 3) {
     const code = iconCode.slice(0, 2);
     switch (code) {
       case "01": return isDayFromIcon ? "wb_sunny" : "nights_stay";
@@ -120,6 +155,6 @@ export const getWeatherIcon = (weatherData, isDay = true) => {
     }
   }
 
-  // Fall back to description parsing
-  return getWeatherIconFromDescription(weatherData?.description, isDay);
+  // Final fallback to description parsing
+  return getWeatherIconFromDescription(description || weather, isDayFromIcon);
 };

@@ -131,9 +131,9 @@ function App() {
   const updateData = (data) => {
     if (data.currentWeather) {
       setWeather(data.currentWeather);
-      setCity(data.currentWeather.name);
+      setCity(data.currentWeather.location?.name || "Unknown");
       setLoading(false);
-      setPrecipitation(data.currentWeather.precipitation.amount);
+      setPrecipitation(data.currentWeather.precipitation?.amount || 0);
     }
     if (data.forecastWeather?.list) {
       setForecast(Object.values(data.forecastWeather.list));

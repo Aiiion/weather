@@ -6,6 +6,13 @@ function WeatherPage({ loading, weather, precipitation, forecast, distanceTime }
   const [expandedDay, setExpandedDay] = useState(null);
   const [activeTooltip, setActiveTooltip] = useState(null);
 
+  // Format precipitation for display
+  const formatPrecipitation = (amount) => {
+    if (amount === 0) return "0mm";
+    if (amount > 0 && amount < 0.1) return "<0.1mm";
+    return `${Math.round(amount * 10) / 10}mm`;
+  };
+
   // Get daily forecast summary (first entry of each day)
   const getDailyForecast = () => {
     return forecast.filter(dayData => dayData.length > 0).map((dayData, idx) => {
@@ -22,7 +29,7 @@ function WeatherPage({ loading, weather, precipitation, forecast, distanceTime }
       const totalPrecipitation = dayData.reduce((sum, h) => sum + (h.precipitation?.amount || 0), 0);
       
       // Create weather object for icon function
-      const noonWeatherObj = { main: noonEntry.weather, description: noonEntry.description };
+      const noonWeatherObj = { icon: noonEntry.icon, weather: noonEntry.weather, description: noonEntry.description };
       
       return {
         day: translateEpochDayShort(firstEntry.dt),
@@ -32,7 +39,7 @@ function WeatherPage({ loading, weather, precipitation, forecast, distanceTime }
         precipitation: Math.round(totalPrecipitation * 10) / 10,
         isFirst: idx === 0,
         hourlyData: dayData.map(hour => {
-          const weatherObj = { main: hour.weather, description: hour.description };
+          const weatherObj = { icon: hour.icon, weather: hour.weather, description: hour.description };
           return {
             time: translateEpochTime(hour.dt),
             temp: Math.round(hour.temperature.temp),
@@ -62,11 +69,11 @@ function WeatherPage({ loading, weather, precipitation, forecast, distanceTime }
         ) : weather ? (
           <div className="relative">
             <span className="text-[clamp(6rem,20vw,9rem)] font-medium text-primary tracking-tighter leading-none">
-              {Math.floor(weather.main.temp)}°
+              {Math.floor(weather.temperature.temp)}°
             </span>
             <div className="absolute -top-4 -right-8">
               <span className="material-symbols-outlined text-secondary text-5xl">
-                {getWeatherIcon(weather.weather[0])}
+                {getWeatherIcon({ icon: weather.icon, weather: weather.weather, description: weather.description })}
               </span>
             </div>
           </div>
@@ -76,10 +83,10 @@ function WeatherPage({ loading, weather, precipitation, forecast, distanceTime }
             <span className="inline-block h-4 w-24 bg-surface-container-low rounded animate-pulse"></span>
           ) : weather ? (
             <>
-              feels like {Math.floor(weather.main.feels_like)}°
+              feels like {Math.floor(weather.temperature.feels_like)}°
               {precipitation > 0 && (
                 <span className="ml-2">
-                  • {precipitation} mm/h
+                  • {formatPrecipitation(precipitation)}/h
                   {weather.snow?.["1h"] && (
                     <Tooltip
                       text="While snow is measured in mm, 1 mm of snow is approximately equivalent to 1 cm of snow depth."
@@ -91,9 +98,9 @@ function WeatherPage({ loading, weather, precipitation, forecast, distanceTime }
             </>
           ) : null}
         </p>
-        {!loading && weather?.weather[0]?.description && (
+        {!loading && weather?.description && (
           <p className="font-['Inter'] text-sm text-secondary mt-2 capitalize">
-            {weather.weather[0].description}
+            {weather.description}
           </p>
         )}
       </section>
@@ -110,7 +117,7 @@ function WeatherPage({ loading, weather, precipitation, forecast, distanceTime }
             {loading ? (
               <span className="inline-block h-6 w-16 bg-surface-container rounded animate-pulse"></span>
             ) : weather ? (
-              `${weather.wind.speed}${distanceTime}`
+              `${weather.wind.speed.toFixed(1)}${distanceTime}`
             ) : '--'}
           </div>
         </div>
@@ -125,7 +132,7 @@ function WeatherPage({ loading, weather, precipitation, forecast, distanceTime }
             {loading ? (
               <span className="inline-block h-6 w-12 bg-surface-container rounded animate-pulse"></span>
             ) : weather ? (
-              `${weather.main.humidity}%`
+              `${weather.humidity}%`
             ) : '--'}
           </div>
         </div>
@@ -143,7 +150,7 @@ function WeatherPage({ loading, weather, precipitation, forecast, distanceTime }
                 {loading ? (
                   <span className="inline-block h-6 w-14 bg-surface-container-low rounded animate-pulse"></span>
                 ) : weather ? (
-                  translateEpochTime(weather.sys.sunrise)
+                  translateEpochTime(weather.sunrise)
                 ) : '--'}
               </span>
             </div>
@@ -152,7 +159,7 @@ function WeatherPage({ loading, weather, precipitation, forecast, distanceTime }
                 {loading ? (
                   <span className="inline-block h-6 w-14 bg-surface-container-low rounded animate-pulse"></span>
                 ) : weather ? (
-                  translateEpochTime(weather.sys.sunset)
+                  translateEpochTime(weather.sunset)
                 ) : '--'}
               </span>
               <span className="material-symbols-outlined text-secondary">nights_stay</span>
@@ -200,7 +207,7 @@ function WeatherPage({ loading, weather, precipitation, forecast, distanceTime }
                     {day.precipitation > 0 && (
                       <div className="flex items-center gap-1 text-on-surface-variant text-xs">
                         <span className="material-symbols-outlined text-sm">water_drop</span>
-                        <span>{day.precipitation}mm</span>
+                        <span>{formatPrecipitation(day.precipitation)}</span>
                       </div>
                     )}
                     <span className="text-on-surface font-semibold">{day.maxTemp}°</span>
@@ -237,7 +244,7 @@ function WeatherPage({ loading, weather, precipitation, forecast, distanceTime }
                           {hour.precipitation > 0 && (
                             <div className="flex items-center gap-1 text-on-surface-variant text-xs">
                               <span className="material-symbols-outlined text-sm">water_drop</span>
-                              <span>{Math.round(hour.precipitation * 10) / 10}mm</span>
+                              <span>{formatPrecipitation(hour.precipitation)}</span>
                             </div>
                           )}
                           <div className="flex items-center gap-1 text-on-surface-variant text-xs">
