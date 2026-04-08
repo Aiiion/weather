@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import "./Tooltip.css";
 
-export default function Tooltip({ text = "", ariaLabel = "More info", icon = "i" }) {
+export default function Tooltip({ text = "", ariaLabel = "More info", icon = "info" }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
 
