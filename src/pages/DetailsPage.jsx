@@ -1,4 +1,4 @@
-import { translateEpochTime, translateEpochDayShort, getWeatherIcon } from "../helpers.js";
+import { translateEpochDayShort } from "../helpers.js";
 
 const AQI_LABELS = ["", "Good", "Fair", "Moderate", "Poor", "Very Poor"];
 const AQI_DESCRIPTIONS = [
