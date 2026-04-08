@@ -4,7 +4,6 @@ import { translateEpochTime, translateEpochDayShort, getWeatherIcon } from "../h
 
 function WeatherPage({ loading, weather, precipitation, forecast, distanceTime }) {
   const [expandedDay, setExpandedDay] = useState(null);
-  const [activeTooltip, setActiveTooltip] = useState(null);
 
   // Format precipitation for display
   const formatPrecipitation = (amount) => {
@@ -56,7 +55,6 @@ function WeatherPage({ loading, weather, precipitation, forecast, distanceTime }
   };
 
   const toggleDayExpanded = (idx) => {
-    setActiveTooltip(null);
     setExpandedDay(expandedDay === idx ? null : idx);
   };
 
@@ -226,19 +224,11 @@ function WeatherPage({ loading, weather, precipitation, forecast, distanceTime }
                       <div key={`${day.day}-${hour.time}`} className="flex items-center justify-between py-2 border-b border-outline-variant/10 last:border-b-0">
                         <div className="flex items-center gap-3">
                           <span className="text-sm text-on-surface-variant w-12">{hour.time}</span>
-                          <button
-                            type="button"
-                            className="relative"
-                            onClick={() => setActiveTooltip(activeTooltip === `${idx}-${hIdx}` ? null : `${idx}-${hIdx}`)}
-                            aria-label={`Weather: ${hour.description}`}
-                          >
-                            <span className="material-symbols-outlined text-secondary text-lg cursor-pointer hover:text-primary transition-colors">{hour.icon}</span>
-                            {activeTooltip === `${idx}-${hIdx}` && hour.description && (
-                              <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 z-50 bg-surface-container-highest text-on-surface text-xs px-3 py-2 rounded-lg shadow-lg whitespace-nowrap capitalize">
-                                {hour.description}
-                              </div>
-                            )}
-                          </button>
+                          <Tooltip
+                            text={hour.description}
+                            ariaLabel={`Weather: ${hour.description}`}
+                            icon={hour.icon}
+                          />
                           <span className="text-sm text-on-surface-variant capitalize hidden sm:inline">{hour.description}</span>
                         </div>
                         <div className="flex items-center gap-4">
