@@ -270,7 +270,7 @@ function App() {
         >
           <span className="material-symbols-outlined">table_rows</span>
         </button>
-        <button 
+        {/* <button 
           onClick={() => setActiveNav("explore")}
           className={`flex flex-col items-center justify-center p-3 rounded-2xl transition-all duration-200 ${
             activeNav === "explore" 
@@ -279,8 +279,8 @@ function App() {
           }`}
         >
           <span className="material-symbols-outlined">explore</span>
-        </button>
-        <button 
+        </button> */}
+        {/* <button 
           onClick={() => setActiveNav("settings")}
           className={`flex flex-col items-center justify-center p-3 rounded-2xl transition-all duration-200 ${
             activeNav === "settings" 
@@ -290,7 +290,7 @@ function App() {
           title="Settings"
         >
           <span className="material-symbols-outlined">settings</span>
-        </button>
+        </button> */}
         </div>
       </nav>
 
