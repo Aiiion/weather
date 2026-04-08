@@ -188,7 +188,7 @@ function WeatherPage({ loading, weather, precipitation, forecast, distanceTime }
             ))
           ) : (
             getDailyForecast().map((day, idx) => (
-              <div key={day.day} className="space-y-0">
+              <div key={`${day.day}-${idx}`} className="space-y-0">
                 <button 
                   onClick={() => toggleDayExpanded(idx)}
                   aria-expanded={expandedDay === idx}
