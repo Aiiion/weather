@@ -101,11 +101,20 @@ export const getWeatherIcon = (weatherData, isDay = true) => {
     return getWeatherIconFromDescription(weatherData, isDay);
   }
 
-  // Try to determine day/night from icon URL if available
+  // Try to determine day/night from icon data if available
   let isDayFromIcon = isDay;
   if (weatherData?.icon && typeof weatherData.icon === "string") {
-    // Icon URL format: "//cdn.weatherapi.com/weather/64x64/day/116.png"
-    isDayFromIcon = weatherData.icon.includes("/day/");
+    const iconValue = weatherData.icon.toLowerCase();
+
+    // WeatherAPI icon URL format: "//cdn.weatherapi.com/weather/64x64/day/116.png"
+    if (iconValue.includes("/day/")) {
+      isDayFromIcon = true;
+    } else if (iconValue.includes("/night/")) {
+      isDayFromIcon = false;
+    } else if (/^\d{2}[dn]$/.test(iconValue)) {
+      // Legacy icon code format: "01d", "10n"
+      isDayFromIcon = iconValue.endsWith("d");
+    }
   }
 
   // Prefer using the weather/description fields for better accuracy
