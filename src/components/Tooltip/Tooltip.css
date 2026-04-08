@@ -4,30 +4,6 @@
   margin-left: 0.6rem;
 }
 
-.tooltip-icon {
-  height: 1em;
-  border-radius: 50%;
-  border: 2px solid #c6c6cc;
-  background: transparent;
-  color: #c6c6cc;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 500;
-  font-family: inherit;
-  cursor: pointer;
-  line-height: 1;
-  transition: border-color 0.2s ease, color 0.2s ease;
-}
-.tooltip-icon:hover {
-  border-color: #e0e2ed;
-  color: #e0e2ed;
-}
-.tooltip-icon:focus {
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(178, 205, 187, 0.2);
-}
-
 .tooltip-bubble {
   position: absolute;
   bottom: calc(100% + 10px);

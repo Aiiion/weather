@@ -87,10 +87,11 @@ function WeatherPage({ loading, weather, precipitation, forecast, distanceTime }
               {precipitation > 0 && (
                 <span className="ml-2">
                   • {formatPrecipitation(precipitation)}/h
-                  {weather.snow?.["1h"] && (
+                  {weather.precipitation?.type === 'snow' && (
                     <Tooltip
                       text="While snow is measured in mm, 1 mm of snow is approximately equivalent to 1 cm of snow depth."
                       ariaLabel="Snow measurement info"
+                      icon="info"
                     />
                   )}
                 </span>
