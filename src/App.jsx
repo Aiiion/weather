@@ -4,7 +4,6 @@ import WarningModal from "./components/WarningModal/WarningModal.jsx";
 import WeatherPage from "./pages/WeatherPage.jsx";
 import DetailsPage from "./pages/DetailsPage.jsx";
 import { useEffect, useState, useRef } from "react";
-import { getWeatherIcon } from "./helpers.js";
 
 const API_BASE_URL = `https://api.alexbierhance.com/v1/weather?days=5&`;
 
