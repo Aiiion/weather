@@ -340,6 +340,8 @@ function DetailsPage({ loading, weather, forecast, distanceTime, measure, pollut
                 className="w-full h-full overflow-visible"
                 viewBox="0 0 1100 100"
                 preserveAspectRatio="none"
+                role="img"
+                aria-label="Temperature, humidity, and wind trend over the next three days"
               >
                 {/* Vertical grid lines */}
                 <g className="opacity-10 stroke-outline-variant">
