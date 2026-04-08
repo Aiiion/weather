@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import "./Tooltip.css";
 
-export default function Tooltip({ text = "", ariaLabel = "More info" }) {
+export default function Tooltip({ text = "", ariaLabel = "More info", icon = "info" }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
 
@@ -25,12 +25,12 @@ export default function Tooltip({ text = "", ariaLabel = "More info" }) {
     <div className={`tooltip ${open ? "open" : ""}`} ref={ref}>
       <button
         type="button"
-        className="tooltip-icon"
+        className="flex items-center justify-center cursor-pointer transition-colors duration-200 text-[#c6c6cc] hover:text-[#e0e2ed] focus:outline-none"
         aria-label={ariaLabel}
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
       >
-        i
+        <span className="material-symbols-outlined text-base">{icon}</span>
       </button>
 
       {text ? (
