@@ -5,13 +5,11 @@ import WeatherPage from "./pages/WeatherPage.jsx";
 import DetailsPage from "./pages/DetailsPage.jsx";
 import InfoPage from "./pages/InfoPage.jsx";
 import { useEffect, useState, useRef } from "react";
-
-const DEV_BASE_URL = "http://localhost:3000/v1/weather?days=5&";
-const API_BASE_URL = `https://api.alexbierhance.com/v1/weather?days=5&`;
+import { BASE_URL } from "./constants.js";
 
 const createApiUrl = ({ lat, lon }, measureValue) => {
   const units = measureValue == "°C" ? "metric" : "imperial";
-  return `${DEV_BASE_URL}lat=${lat}&lon=${lon}&units=${units}`;
+  return `${BASE_URL}lat=${lat}&lon=${lon}&units=${units}`;
 };
 
 const toJSON = (response) => response.json();
