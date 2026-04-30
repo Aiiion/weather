@@ -3,13 +3,15 @@ import WarningIcon from "./components/WarningIcon/WarningIcon.jsx";
 import WarningModal from "./components/WarningModal/WarningModal.jsx";
 import WeatherPage from "./pages/WeatherPage.jsx";
 import DetailsPage from "./pages/DetailsPage.jsx";
+import InfoPage from "./pages/InfoPage.jsx";
 import { useEffect, useState, useRef } from "react";
 
+const DEV_BASE_URL = "http://localhost:3000/v1/weather?days=5&";
 const API_BASE_URL = `https://api.alexbierhance.com/v1/weather?days=5&`;
 
 const createApiUrl = ({ lat, lon }, measureValue) => {
   const units = measureValue == "°C" ? "metric" : "imperial";
-  return `${API_BASE_URL}lat=${lat}&lon=${lon}&units=${units}`;
+  return `${DEV_BASE_URL}lat=${lat}&lon=${lon}&units=${units}`;
 };
 
 const toJSON = (response) => response.json();
@@ -244,6 +246,13 @@ function App() {
             pollution={pollution}
           />
         )}
+        {activeNav === "info" && (
+          <InfoPage
+            loading={loading}
+            weather={weather}
+            weatherWarning={weatherWarning}
+          />
+        )}
       </main>
 
       {/* BottomNavBar */}
@@ -269,27 +278,17 @@ function App() {
         >
           <span className="material-symbols-outlined">table_rows</span>
         </button>
-        {/* <button 
-          onClick={() => setActiveNav("explore")}
+        <button 
+          onClick={() => setActiveNav("info")}
           className={`flex flex-col items-center justify-center p-3 rounded-2xl transition-all duration-200 ${
-            activeNav === "explore" 
+            activeNav === "info" 
               ? 'bg-surface-variant text-tertiary' 
               : 'text-outline-variant hover:text-primary'
           }`}
         >
-          <span className="material-symbols-outlined">explore</span>
-        </button> */}
-        {/* <button 
-          onClick={() => setActiveNav("settings")}
-          className={`flex flex-col items-center justify-center p-3 rounded-2xl transition-all duration-200 ${
-            activeNav === "settings" 
-              ? 'bg-surface-variant text-tertiary' 
-              : 'text-outline-variant hover:text-primary'
-          }`}
-          title="Settings"
-        >
-          <span className="material-symbols-outlined">settings</span>
-        </button> */}
+          <span className="material-symbols-outlined">info</span>
+        </button>
+        
         </div>
       </nav>
 
