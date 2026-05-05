@@ -24,7 +24,7 @@ function App() {
   const [forecast, setForecast] = useState([]);
   const [weatherWarning, setWeatherWarning] = useState(null);
   const [coords, setCoords] = useState({});
-  const [geoId, setGeoId] = useState(null);
+  const geoId = useRef(null);
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isWarningOpen, setIsWarningOpen] = useState(false);
@@ -69,8 +69,7 @@ function App() {
       return new Promise((resolve) => resolve(coords));
     }
     return new Promise((resolve, reject) => {
-      setGeoId(
-        navigator.geolocation.watchPosition(
+      geoId.current = navigator.geolocation.watchPosition(
           (position) =>
             resolve({
               lat: position.coords.latitude.toFixed(3),
@@ -85,8 +84,7 @@ function App() {
             timeout: 45 * 1000,
             maximumAge: 20 * 1000,
           },
-        ),
-      );
+        );
     });
   };
   const getPermissonStatus = () =>
@@ -117,7 +115,7 @@ function App() {
           updateData(res.data);
         }
       })
-      .then(() => navigator.geolocation.clearWatch(geoId))
+      .then(() => navigator.geolocation.clearWatch(geoId.current))
       .catch((err) => {
         // Ignore abort errors, handle other errors
         if (err.name === 'AbortError') {
