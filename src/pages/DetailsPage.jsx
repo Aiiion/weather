@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { translateEpochDayShort } from "../helpers.js";
 
 const AQI_LABELS = ["", "Good", "Fair", "Moderate", "Poor", "Very Poor"];
@@ -48,8 +49,7 @@ function AirQualityCard({ loading, pollution }) {
 }
 
 function DetailsPage({ loading, weather, forecast, distanceTime, measure, pollution }) {
-  // Build 3-day summary from forecast data
-  const getDailyForecast = () => {
+  const dailyForecast = useMemo(() => {
     if (!forecast || forecast.length === 0) return [];
     return forecast
       .filter((dayData) => dayData.length > 0)
@@ -75,9 +75,7 @@ function DetailsPage({ loading, weather, forecast, distanceTime, measure, pollut
           })),
         };
       });
-  };
-
-  const dailyForecast = getDailyForecast();
+  }, [forecast]);
 
   // Build SVG chart points from real hourly data (temp, humidity, wind) across 3 days
   const buildChartPath = (getValue, allHours) => {
@@ -97,10 +95,13 @@ function DetailsPage({ loading, weather, forecast, distanceTime, measure, pollut
       .join(" ");
   };
 
-  const allHours = dailyForecast.flatMap((d) => d.hourlyData);
+  const allHours = useMemo(
+    () => dailyForecast.flatMap((d) => d.hourlyData),
+    [dailyForecast]
+  );
 
-  const tempPath = buildChartPath((h) => h.temp, allHours);
-  const windPath = buildChartPath((h) => h.wind, allHours);
+  const tempPath = useMemo(() => buildChartPath((h) => h.temp, allHours), [allHours]);
+  const windPath = useMemo(() => buildChartPath((h) => h.wind, allHours), [allHours]);
 
   const currentTemp = weather ? Math.round(weather.temperature.temp) : null;
   const currentDesc = weather?.description ?? null;

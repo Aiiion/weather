@@ -1,19 +1,17 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Tooltip from "../components/Tooltip/Tooltip.jsx";
 import { translateEpochTime, translateEpochDayShort, getWeatherIcon } from "../helpers.js";
+
+const formatPrecipitation = (amount) => {
+  if (amount === 0) return "0mm";
+  if (amount > 0 && amount < 0.1) return "<0.1mm";
+  return `${Math.round(amount * 10) / 10}mm`;
+};
 
 function WeatherPage({ loading, weather, precipitation, forecast, distanceTime }) {
   const [expandedDay, setExpandedDay] = useState(null);
 
-  // Format precipitation for display
-  const formatPrecipitation = (amount) => {
-    if (amount === 0) return "0mm";
-    if (amount > 0 && amount < 0.1) return "<0.1mm";
-    return `${Math.round(amount * 10) / 10}mm`;
-  };
-
-  // Get daily forecast summary (first entry of each day)
-  const getDailyForecast = () => {
+  const dailyForecast = useMemo(() => {
     return forecast.filter(dayData => dayData.length > 0).map((dayData, idx) => {
       const firstEntry = dayData[0];
       // Find entry closest to midday (12:00-15:00 range typical in 3-hour data)
@@ -53,7 +51,7 @@ function WeatherPage({ loading, weather, precipitation, forecast, distanceTime }
         })
       };
     });
-  };
+  }, [forecast]);
 
   const toggleDayExpanded = (idx) => {
     setExpandedDay(expandedDay === idx ? null : idx);
@@ -194,7 +192,7 @@ function WeatherPage({ loading, weather, precipitation, forecast, distanceTime }
               </div>
             ))
           ) : (
-            getDailyForecast().map((day, idx) => (
+            dailyForecast.map((day, idx) => (
               <div key={`${day.day}-${idx}`} className="space-y-0">
                 <button 
                   onClick={() => toggleDayExpanded(idx)}

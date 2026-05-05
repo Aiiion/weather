@@ -19,11 +19,11 @@ const toJSON = (response) => response.json();
 function App() {
   const [city, setCity] = useState();
   const [measure, setMeasure] = useState("°C");
-  const [distanceTime, setDistanceTime] = useState("m/s");
+  const distanceTime = measure === "°C" ? "m/s" : "mph";
   const [weather, setWeather] = useState(null);
   const [forecast, setForecast] = useState([]);
   const [weatherWarning, setWeatherWarning] = useState(null);
-  const [coords, setCoords] = useState({});
+  const coordsRef = useRef({});
   const geoId = useRef(null);
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -65,8 +65,8 @@ function App() {
   }, [measure]);
 
   const getLatLon = () => {
-    if (coords.lat && coords.lon) {
-      return new Promise((resolve) => resolve(coords));
+    if (coordsRef.current.lat && coordsRef.current.lon) {
+      return Promise.resolve(coordsRef.current);
     }
     return new Promise((resolve, reject) => {
       geoId.current = navigator.geolocation.watchPosition(
@@ -99,7 +99,7 @@ function App() {
     });
 
   const cacheCoords = (coords) => {
-    setCoords(coords);
+    coordsRef.current = coords;
     return coords;
   };
   const getWeatherData = (measureValue, signal) => {
@@ -150,13 +150,7 @@ function App() {
   };
 
   const switchTemp = () => {
-    if (measure === "°F") {
-      setMeasure("°C");
-      setDistanceTime("m/s");
-    } else {
-      setMeasure("°F");
-      setDistanceTime("mph");
-    }
+    setMeasure((prev) => (prev === "°F" ? "°C" : "°F"));
   };
 
   function refresh() {
