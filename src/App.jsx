@@ -252,14 +252,14 @@ function App() {
       </main>
 
       {/* BottomNavBar */}
-      <nav className="fixed bottom-5 z-50 flex justify-around items-center px-2 pb-3 pt-3 bg-background/60 backdrop-blur-xl rounded-t-3xl shadow-[0_-10px_30px_rgba(0,0,0,0.08)] w-full box-border">
-        <div className="max-w-[1200px] mx-auto w-full flex justify-around items-center">
+      <nav className="fixed bottom-5 z-50 w-full flex justify-center px-4 box-border">
+        <div className="max-w-[1200px] w-full flex justify-around items-center px-2 pb-3 pt-3 bg-surface-container-high/80 backdrop-blur-xl rounded-3xl shadow-[0_-10px_30px_rgba(0,0,0,0.08)]">
         <button 
           onClick={() => setActiveNav("weather")}
           className={`flex flex-col items-center justify-center p-3 rounded-2xl transition-all duration-200 active:scale-90 ${
             activeNav === "weather" 
-              ? 'bg-surface-variant text-tertiary' 
-              : 'text-outline-variant hover:text-primary'
+              ? 'bg-surface-bright text-tertiary' 
+              : 'text-on-surface-variant hover:text-primary'
           }`}
         >
           <span className="material-symbols-outlined">wb_sunny</span>
@@ -268,8 +268,8 @@ function App() {
           onClick={() => setActiveNav("details")}
           className={`flex flex-col items-center justify-center p-3 rounded-2xl transition-all duration-200 ${
             activeNav === "details" 
-              ? 'bg-surface-variant text-tertiary' 
-              : 'text-outline-variant hover:text-primary'
+              ? 'bg-surface-bright text-tertiary' 
+              : 'text-on-surface-variant hover:text-primary'
           }`}
         >
           <span className="material-symbols-outlined">table_rows</span>
@@ -279,8 +279,8 @@ function App() {
           aria-label="Info"
           className={`flex flex-col items-center justify-center p-3 rounded-2xl transition-all duration-200 ${
             activeNav === "info" 
-              ? 'bg-surface-variant text-tertiary' 
-              : 'text-outline-variant hover:text-primary'
+              ? 'bg-surface-bright text-tertiary' 
+              : 'text-on-surface-variant hover:text-primary'
           }`}
         >
           <span className="material-symbols-outlined">info</span>
