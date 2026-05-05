@@ -61,6 +61,10 @@ function App() {
     return () => {
       // Cleanup: abort on unmount or before next effect
       controller.abort();
+      if (geoId.current != null) {
+        navigator.geolocation.clearWatch(geoId.current);
+        geoId.current = null;
+      }
     };
   }, [measure]);
 
@@ -70,12 +74,17 @@ function App() {
     }
     return new Promise((resolve, reject) => {
       geoId.current = navigator.geolocation.watchPosition(
-          (position) =>
+          (position) => {
+            navigator.geolocation.clearWatch(geoId.current);
+            geoId.current = null;
             resolve({
               lat: position.coords.latitude.toFixed(3),
               lon: position.coords.longitude.toFixed(3),
-            }),
+            });
+          },
           () => {
+            navigator.geolocation.clearWatch(geoId.current);
+            geoId.current = null;
             reject("Unable to retrieve your location");
             printNoLocationError();
           },
@@ -250,6 +259,7 @@ function App() {
         <div className="max-w-[1200px] w-full flex justify-around items-center px-2 pb-3 pt-3 bg-surface-container-high/80 backdrop-blur-xl rounded-3xl shadow-[0_-10px_30px_rgba(0,0,0,0.08)]">
         <button 
           onClick={() => setActiveNav("weather")}
+          aria-label="Weather"
           className={`flex flex-col items-center justify-center p-3 rounded-2xl transition-all duration-200 active:scale-90 ${
             activeNav === "weather" 
               ? 'bg-surface-bright text-tertiary' 
@@ -260,6 +270,7 @@ function App() {
         </button>
         <button 
           onClick={() => setActiveNav("details")}
+          aria-label="Details"
           className={`flex flex-col items-center justify-center p-3 rounded-2xl transition-all duration-200 ${
             activeNav === "details" 
               ? 'bg-surface-bright text-tertiary' 

@@ -260,9 +260,9 @@ function DetailsPage({ loading, weather, forecast, distanceTime, measure, pollut
                 ) : "--"}
               </div>
               <div className="text-on-tertiary-container text-[0.75rem]">
-                {windDir ? `From ${windDir}` : ""},
+                {windDir ? `From ${windDir}` : ""}
                 {windGust != null && (
-                  <span className={windDir ? " · " : ""}> {`Gusts ${windGust.toFixed(1)} ${distanceTime}`}</span>
+                  <span>{windDir ? " · " : ""}{`Gusts ${windGust.toFixed(1)} ${distanceTime}`}</span>
                 )}
               </div>
             </div>
