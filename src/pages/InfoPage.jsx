@@ -98,11 +98,10 @@ function InfoPage({ weather, weatherWarning, loading, onBack }) {
                 ))
               ) : (
                 <>
-                  <span className="px-3 py-1 bg-surface-container-highest rounded-full text-[10px] font-bold tracking-[0.05em] uppercase text-on-surface-variant">
-                    NWS
-                  </span>
-                  <span className="px-3 py-1 bg-surface-container-highest rounded-full text-[10px] font-bold tracking-[0.05em] uppercase text-on-surface-variant">
-                    GWS
+                  <span
+                    className="px-3 py-1 bg-surface-container-highest rounded-full text-[10px] font-bold tracking-[0.05em] uppercase text-on-surface-variant"
+                  >
+                    weatherapi.com
                   </span>
                 </>
               )}
