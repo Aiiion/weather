@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { translateEpochDayShort } from "../helpers.js";
 
 const AQI_LABELS = ["", "Good", "Fair", "Moderate", "Poor", "Very Poor"];
@@ -48,8 +49,7 @@ function AirQualityCard({ loading, pollution }) {
 }
 
 function DetailsPage({ loading, weather, forecast, distanceTime, measure, pollution }) {
-  // Build 3-day summary from forecast data
-  const getDailyForecast = () => {
+  const dailyForecast = useMemo(() => {
     if (!forecast || forecast.length === 0) return [];
     return forecast
       .filter((dayData) => dayData.length > 0)
@@ -71,14 +71,11 @@ function DetailsPage({ loading, weather, forecast, distanceTime, measure, pollut
           hourlyData: dayData.map((h) => ({
             dt: h.dt,
             temp: Math.round(h.temperature.temp),
-            humidity: h.humidity,
             wind: Math.round(h.wind.speed),
           })),
         };
       });
-  };
-
-  const dailyForecast = getDailyForecast();
+  }, [forecast]);
 
   // Build SVG chart points from real hourly data (temp, humidity, wind) across 3 days
   const buildChartPath = (getValue, allHours) => {
@@ -98,11 +95,13 @@ function DetailsPage({ loading, weather, forecast, distanceTime, measure, pollut
       .join(" ");
   };
 
-  const allHours = dailyForecast.flatMap((d) => d.hourlyData);
+  const allHours = useMemo(
+    () => dailyForecast.flatMap((d) => d.hourlyData),
+    [dailyForecast]
+  );
 
-  const tempPath = buildChartPath((h) => h.temp, allHours);
-  const humidityPath = buildChartPath((h) => h.humidity, allHours);
-  const windPath = buildChartPath((h) => h.wind, allHours);
+  const tempPath = useMemo(() => buildChartPath((h) => h.temp, allHours), [allHours]);
+  const windPath = useMemo(() => buildChartPath((h) => h.wind, allHours), [allHours]);
 
   const currentTemp = weather ? Math.round(weather.temperature.temp) : null;
   const currentDesc = weather?.description ?? null;
@@ -144,6 +143,7 @@ function DetailsPage({ loading, weather, forecast, distanceTime, measure, pollut
   const highTemp = todayData?.maxTemp ?? null;
   const lowTemp = todayData?.minTemp ?? null;
 
+  const windGust = weather?.wind?.gust ?? null;
   const windDeg = weather?.wind?.deg ?? null;
   const getWindDirection = (deg) => {
     if (deg == null) return null;
@@ -261,6 +261,9 @@ function DetailsPage({ loading, weather, forecast, distanceTime, measure, pollut
               </div>
               <div className="text-on-tertiary-container text-[0.75rem]">
                 {windDir ? `From ${windDir}` : ""}
+                {windGust != null && (
+                  <span>{windDir ? " · " : ""}{`Gusts ${windGust.toFixed(1)} ${distanceTime}`}</span>
+                )}
               </div>
             </div>
           </div>
@@ -308,12 +311,8 @@ function DetailsPage({ loading, weather, forecast, distanceTime, measure, pollut
           <h3 className="text-on-surface font-['Inter'] text-base font-semibold">3-Day Condition Tracking</h3>
           <div className="flex gap-4">
             <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-secondary" />
-              <span className="text-[0.625rem] text-on-surface-variant font-bold uppercase tracking-wider">Temp</span>
-            </div>
-            <div className="flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-tertiary" />
-              <span className="text-[0.625rem] text-on-surface-variant font-bold uppercase tracking-wider">Humidity</span>
+              <span className="text-[0.625rem] text-on-surface-variant font-bold uppercase tracking-wider">Temp</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-primary-fixed-dim" />
@@ -341,7 +340,7 @@ function DetailsPage({ loading, weather, forecast, distanceTime, measure, pollut
                 viewBox="0 0 1100 100"
                 preserveAspectRatio="none"
                 role="img"
-                aria-label="Temperature, humidity, and wind trend over the next three days"
+                aria-label="Temperature and wind trend over the next three days"
               >
                 {/* Vertical grid lines */}
                 <g className="opacity-10 stroke-outline-variant">
@@ -352,14 +351,6 @@ function DetailsPage({ loading, weather, forecast, distanceTime, measure, pollut
                 {/* Temperature */}
                 <path
                   d={tempPath}
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  className="text-secondary opacity-90"
-                />
-                {/* Humidity */}
-                <path
-                  d={humidityPath}
                   fill="none"
                   stroke="currentColor"
                   strokeWidth="2"

@@ -1,19 +1,17 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Tooltip from "../components/Tooltip/Tooltip.jsx";
 import { translateEpochTime, translateEpochDayShort, getWeatherIcon } from "../helpers.js";
+
+const formatPrecipitation = (amount) => {
+  if (amount === 0) return "0mm";
+  if (amount > 0 && amount < 0.1) return "<0.1mm";
+  return `${Math.round(amount * 10) / 10}mm`;
+};
 
 function WeatherPage({ loading, weather, precipitation, forecast, distanceTime }) {
   const [expandedDay, setExpandedDay] = useState(null);
 
-  // Format precipitation for display
-  const formatPrecipitation = (amount) => {
-    if (amount === 0) return "0mm";
-    if (amount > 0 && amount < 0.1) return "<0.1mm";
-    return `${Math.round(amount * 10) / 10}mm`;
-  };
-
-  // Get daily forecast summary (first entry of each day)
-  const getDailyForecast = () => {
+  const dailyForecast = useMemo(() => {
     return forecast.filter(dayData => dayData.length > 0).map((dayData, idx) => {
       const firstEntry = dayData[0];
       // Find entry closest to midday (12:00-15:00 range typical in 3-hour data)
@@ -46,13 +44,14 @@ function WeatherPage({ loading, weather, precipitation, forecast, distanceTime }
             description: hour.description,
             icon: getWeatherIcon(weatherObj),
             wind: Math.round(hour.wind.speed),
+            gust: Math.round(hour.wind.gust),
             humidity: hour.humidity,
             precipitation: hour.precipitation?.amount || 0
           };
         })
       };
     });
-  };
+  }, [forecast]);
 
   const toggleDayExpanded = (idx) => {
     setExpandedDay(expandedDay === idx ? null : idx);
@@ -112,12 +111,19 @@ function WeatherPage({ loading, weather, precipitation, forecast, distanceTime }
             <span className="font-['Inter'] text-[0.6875rem] font-bold uppercase tracking-[0.05em] text-on-surface-variant">Wind</span>
             <span className="material-symbols-outlined text-secondary text-xl">air</span>
           </div>
-          <div className="text-xl font-semibold text-on-surface">
-            {loading ? (
-              <span className="inline-block h-6 w-16 bg-surface-container rounded animate-pulse"></span>
-            ) : weather ? (
-              `${weather.wind.speed.toFixed(1)}${distanceTime}`
-            ) : '--'}
+          <div>
+            <div className="text-xl font-semibold text-on-surface">
+              {loading ? (
+                <span className="inline-block h-6 w-16 bg-surface-container rounded animate-pulse"></span>
+              ) : weather ? (
+                `${weather.wind.speed.toFixed(1)}${distanceTime}`
+              ) : '--'}
+            </div>
+            {!loading && weather?.wind?.gust && (
+              <div className="text-xs text-on-surface-variant mt-1">
+                Gusts {weather.wind.gust.toFixed(1)}{distanceTime}
+              </div>
+            )}
           </div>
         </div>
 
@@ -186,7 +192,7 @@ function WeatherPage({ loading, weather, precipitation, forecast, distanceTime }
               </div>
             ))
           ) : (
-            getDailyForecast().map((day, idx) => (
+            dailyForecast.map((day, idx) => (
               <div key={`${day.day}-${idx}`} className="space-y-0">
                 <button 
                   onClick={() => toggleDayExpanded(idx)}
@@ -217,7 +223,7 @@ function WeatherPage({ loading, weather, precipitation, forecast, distanceTime }
                   </div>
                 </button>
                 {expandedDay === idx && (
-                  <div id={`day-panel-${idx}`} className={`bg-surface-container p-4 rounded-b-3xl space-y-3 ${
+                  <div id={`day-panel-${idx}`} className={`bg-surface-container p-4 rounded-3xl space-y-3 ${
                     day.isFirst ? 'border-t border-outline-variant/20' : ''
                   }`}>
                     {day.hourlyData.map((hour, hIdx) => (
@@ -240,7 +246,7 @@ function WeatherPage({ loading, weather, precipitation, forecast, distanceTime }
                           )}
                           <div className="flex items-center gap-1 text-on-surface-variant text-xs">
                             <span className="material-symbols-outlined text-sm">air</span>
-                            <span>{hour.wind}{distanceTime}</span>
+                            <span>{hour.wind}{hour.gust ? ` (↑${hour.gust})` : ''}{distanceTime}</span>
                           </div>
                           <div className="flex items-center gap-1 text-on-surface-variant text-xs hidden sm:flex">
                             <span className="material-symbols-outlined text-sm">humidity_percentage</span>

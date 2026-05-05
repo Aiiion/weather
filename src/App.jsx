@@ -3,13 +3,13 @@ import WarningIcon from "./components/WarningIcon/WarningIcon.jsx";
 import WarningModal from "./components/WarningModal/WarningModal.jsx";
 import WeatherPage from "./pages/WeatherPage.jsx";
 import DetailsPage from "./pages/DetailsPage.jsx";
+import InfoPage from "./pages/InfoPage.jsx";
 import { useEffect, useState, useRef } from "react";
-
-const API_BASE_URL = `https://api.alexbierhance.com/v1/weather?days=5&`;
+import { BASE_URL } from "./constants.js";
 
 const createApiUrl = ({ lat, lon }, measureValue) => {
   const units = measureValue == "°C" ? "metric" : "imperial";
-  return `${API_BASE_URL}lat=${lat}&lon=${lon}&units=${units}`;
+  return `${BASE_URL}lat=${lat}&lon=${lon}&units=${units}`;
 };
 
 const toJSON = (response) => response.json();
@@ -19,12 +19,12 @@ const toJSON = (response) => response.json();
 function App() {
   const [city, setCity] = useState();
   const [measure, setMeasure] = useState("°C");
-  const [distanceTime, setDistanceTime] = useState("m/s");
+  const distanceTime = measure === "°C" ? "m/s" : "mph";
   const [weather, setWeather] = useState(null);
   const [forecast, setForecast] = useState([]);
   const [weatherWarning, setWeatherWarning] = useState(null);
-  const [coords, setCoords] = useState({});
-  const [geoId, setGeoId] = useState(null);
+  const coordsRef = useRef({});
+  const geoId = useRef(null);
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isWarningOpen, setIsWarningOpen] = useState(false);
@@ -61,22 +61,30 @@ function App() {
     return () => {
       // Cleanup: abort on unmount or before next effect
       controller.abort();
+      if (geoId.current != null) {
+        navigator.geolocation.clearWatch(geoId.current);
+        geoId.current = null;
+      }
     };
   }, [measure]);
 
   const getLatLon = () => {
-    if (coords.lat && coords.lon) {
-      return new Promise((resolve) => resolve(coords));
+    if (coordsRef.current.lat && coordsRef.current.lon) {
+      return Promise.resolve(coordsRef.current);
     }
     return new Promise((resolve, reject) => {
-      setGeoId(
-        navigator.geolocation.watchPosition(
-          (position) =>
+      geoId.current = navigator.geolocation.watchPosition(
+          (position) => {
+            navigator.geolocation.clearWatch(geoId.current);
+            geoId.current = null;
             resolve({
               lat: position.coords.latitude.toFixed(3),
               lon: position.coords.longitude.toFixed(3),
-            }),
+            });
+          },
           () => {
+            navigator.geolocation.clearWatch(geoId.current);
+            geoId.current = null;
             reject("Unable to retrieve your location");
             printNoLocationError();
           },
@@ -85,8 +93,7 @@ function App() {
             timeout: 45 * 1000,
             maximumAge: 20 * 1000,
           },
-        ),
-      );
+        );
     });
   };
   const getPermissonStatus = () =>
@@ -101,7 +108,7 @@ function App() {
     });
 
   const cacheCoords = (coords) => {
-    setCoords(coords);
+    coordsRef.current = coords;
     return coords;
   };
   const getWeatherData = (measureValue, signal) => {
@@ -117,7 +124,7 @@ function App() {
           updateData(res.data);
         }
       })
-      .then(() => navigator.geolocation.clearWatch(geoId))
+      .then(() => navigator.geolocation.clearWatch(geoId.current))
       .catch((err) => {
         // Ignore abort errors, handle other errors
         if (err.name === 'AbortError') {
@@ -152,13 +159,7 @@ function App() {
   };
 
   const switchTemp = () => {
-    if (measure === "°F") {
-      setMeasure("°C");
-      setDistanceTime("m/s");
-    } else {
-      setMeasure("°F");
-      setDistanceTime("mph");
-    }
+    setMeasure((prev) => (prev === "°F" ? "°C" : "°F"));
   };
 
   function refresh() {
@@ -244,52 +245,52 @@ function App() {
             pollution={pollution}
           />
         )}
+        {activeNav === "info" && (
+          <InfoPage
+            loading={loading}
+            weather={weather}
+            weatherWarning={weatherWarning}
+          />
+        )}
       </main>
 
       {/* BottomNavBar */}
-      <nav className="fixed bottom-5 z-50 flex justify-around items-center px-2 pb-3 pt-3 bg-background/60 backdrop-blur-xl rounded-t-3xl shadow-[0_-10px_30px_rgba(0,0,0,0.08)] w-full box-border">
-        <div className="max-w-[1200px] mx-auto w-full flex justify-around items-center">
+      <nav className="fixed bottom-5 z-50 w-full flex justify-center px-4 box-border">
+        <div className="max-w-[1200px] w-full flex justify-around items-center px-2 pb-3 pt-3 bg-surface-container-high/80 backdrop-blur-xl rounded-3xl shadow-[0_-10px_30px_rgba(0,0,0,0.08)]">
         <button 
           onClick={() => setActiveNav("weather")}
+          aria-label="Weather"
           className={`flex flex-col items-center justify-center p-3 rounded-2xl transition-all duration-200 active:scale-90 ${
             activeNav === "weather" 
-              ? 'bg-surface-variant text-tertiary' 
-              : 'text-outline-variant hover:text-primary'
+              ? 'bg-surface-bright text-tertiary' 
+              : 'text-on-surface-variant hover:text-primary'
           }`}
         >
           <span className="material-symbols-outlined">wb_sunny</span>
         </button>
         <button 
           onClick={() => setActiveNav("details")}
+          aria-label="Details"
           className={`flex flex-col items-center justify-center p-3 rounded-2xl transition-all duration-200 ${
             activeNav === "details" 
-              ? 'bg-surface-variant text-tertiary' 
-              : 'text-outline-variant hover:text-primary'
+              ? 'bg-surface-bright text-tertiary' 
+              : 'text-on-surface-variant hover:text-primary'
           }`}
         >
           <span className="material-symbols-outlined">table_rows</span>
         </button>
-        {/* <button 
-          onClick={() => setActiveNav("explore")}
+        <button 
+          onClick={() => setActiveNav("info")}
+          aria-label="Info"
           className={`flex flex-col items-center justify-center p-3 rounded-2xl transition-all duration-200 ${
-            activeNav === "explore" 
-              ? 'bg-surface-variant text-tertiary' 
-              : 'text-outline-variant hover:text-primary'
+            activeNav === "info" 
+              ? 'bg-surface-bright text-tertiary' 
+              : 'text-on-surface-variant hover:text-primary'
           }`}
         >
-          <span className="material-symbols-outlined">explore</span>
-        </button> */}
-        {/* <button 
-          onClick={() => setActiveNav("settings")}
-          className={`flex flex-col items-center justify-center p-3 rounded-2xl transition-all duration-200 ${
-            activeNav === "settings" 
-              ? 'bg-surface-variant text-tertiary' 
-              : 'text-outline-variant hover:text-primary'
-          }`}
-          title="Settings"
-        >
-          <span className="material-symbols-outlined">settings</span>
-        </button> */}
+          <span className="material-symbols-outlined">info</span>
+        </button>
+        
         </div>
       </nav>
 
