@@ -42,7 +42,7 @@ function InfoPage({ weather, weatherWarning, loading, onBack }) {
                 <span className="inline-block h-4 w-36 bg-surface-container rounded animate-pulse" />
               ) : (
                 <span className="text-xs font-bold tracking-[0.05em] uppercase text-tertiary">
-                  {weatherProvider ?? "openweathermaps.org"}
+                  {weatherProvider ?? "openweathermap.org"}
                 </span>
               )}
             </div>

@@ -278,6 +278,7 @@ function App() {
         </button>
         <button 
           onClick={() => setActiveNav("info")}
+          aria-label="Info"
           className={`flex flex-col items-center justify-center p-3 rounded-2xl transition-all duration-200 ${
             activeNav === "info" 
               ? 'bg-surface-variant text-tertiary' 
