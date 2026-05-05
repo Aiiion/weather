@@ -2,8 +2,12 @@ const VERSION = "v1.1.0";
 
 const formatProviders = (providers) => {
   if (!providers) return null;
-  if (Array.isArray(providers)) return providers.join(", ");
-  return String(providers);
+  if (Array.isArray(providers)) {
+    const joined = providers.join(", ");
+    return joined.trim() ? joined : null;
+  }
+  const str = String(providers);
+  return str.trim() ? str : null;
 };
 
 function InfoPage({ weather, weatherWarning, loading, onBack }) {
