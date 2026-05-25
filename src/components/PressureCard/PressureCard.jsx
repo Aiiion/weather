@@ -1,3 +1,5 @@
+import { memo } from "react";
+
 function PressureCard({ loading, pressure }) {
   return (
     <div className="p-5 bg-surface-container-low asymmetric-radius flex flex-col justify-between min-h-[120px]">
@@ -19,4 +21,4 @@ function PressureCard({ loading, pressure }) {
   );
 }
 
-export default PressureCard;
+export default memo(PressureCard);

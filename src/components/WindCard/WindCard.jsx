@@ -1,3 +1,5 @@
+import { memo } from "react";
+
 const getWindDirection = (deg) => {
   if (deg == null) return null;
   const dirs = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
@@ -32,4 +34,4 @@ function WindCard({ loading, speed, gust, deg, distanceTime }) {
   );
 }
 
-export default WindCard;
+export default memo(WindCard);

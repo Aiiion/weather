@@ -1,3 +1,5 @@
+import { memo } from "react";
+
 const getVisibilityLabel = (visibilityM) => {
   if (visibilityM == null) return null;
   if (visibilityM >= 10000) return "Perfectly clear";
@@ -37,4 +39,4 @@ function VisibilityCard({ loading, visibilityM, measure }) {
   );
 }
 
-export default VisibilityCard;
+export default memo(VisibilityCard);

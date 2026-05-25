@@ -1,3 +1,5 @@
+import { memo } from "react";
+
 const getUVLabel = (uvIndex) => {
   if (uvIndex == null) return null;
   if (uvIndex >= 11) return "Extreme";
@@ -30,4 +32,4 @@ function UVIndexCard({ loading, uvIndex }) {
   );
 }
 
-export default UVIndexCard;
+export default memo(UVIndexCard);

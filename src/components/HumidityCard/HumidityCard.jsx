@@ -1,3 +1,5 @@
+import { memo } from "react";
+
 const getHumidityLabel = (humidity) => {
   if (humidity == null) return "";
   if (humidity > 80) return "Very humid";
@@ -27,4 +29,4 @@ function HumidityCard({ loading, humidity }) {
   );
 }
 
-export default HumidityCard;
+export default memo(HumidityCard);
