@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import Tooltip from "../components/Tooltip/Tooltip.jsx";
 import WindCard from "../components/WindCard/WindCard.jsx";
 import HumidityCard from "../components/HumidityCard/HumidityCard.jsx";
+import SunriseCard from "../components/SunriseCard/SunriseCard.jsx";
 import { translateEpochTime, translateEpochDayShort, getWeatherIcon } from "../helpers.js";
 
 const formatPrecipitation = (amount) => {
@@ -114,34 +115,7 @@ function WeatherPage({ loading, weather, precipitation, forecast, distanceTime }
         <HumidityCard loading={loading} humidity={weather?.humidity} />
 
         {/* Sunrise / Sunset Spanning Card */}
-        <div className="col-span-2 asymmetric-radius bg-surface-container p-5 flex flex-col justify-between h-32">
-          <div className="flex justify-between items-start">
-            <span className="font-['Inter'] text-[0.6875rem] font-bold uppercase tracking-[0.05em] text-on-surface-variant">Sunrise</span>
-            <span className="font-['Inter'] text-[0.6875rem] font-bold uppercase tracking-[0.05em] text-on-surface-variant">Sunset</span>
-          </div>
-          <div className="flex justify-between items-end">
-            <div className="flex items-center gap-2">
-              <span className="material-symbols-outlined text-tertiary">wb_twilight</span>
-              <span className="text-xl font-semibold text-on-surface">
-                {loading ? (
-                  <span className="inline-block h-6 w-14 bg-surface-container-low rounded animate-pulse"></span>
-                ) : weather ? (
-                  translateEpochTime(weather.sunrise)
-                ) : '--'}
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-xl font-semibold text-on-surface">
-                {loading ? (
-                  <span className="inline-block h-6 w-14 bg-surface-container-low rounded animate-pulse"></span>
-                ) : weather ? (
-                  translateEpochTime(weather.sunset)
-                ) : '--'}
-              </span>
-              <span className="material-symbols-outlined text-secondary">nights_stay</span>
-            </div>
-          </div>
-        </div>
+        <SunriseCard loading={loading} sunrise={weather?.sunrise} sunset={weather?.sunset} className="col-span-2" />
       </section>
 
       {/* Forecast Section */}
