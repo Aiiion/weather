@@ -227,35 +227,41 @@ function WeatherPage({ loading, weather, precipitation, forecast, distanceTime }
                     day.isFirst ? 'border-t border-outline-variant/20' : ''
                   }`}>
                     {day.hourlyData.map((hour, hIdx) => (
-                      <div key={`${day.day}-${hour.time}`} className="flex items-center justify-between py-2 border-b border-outline-variant/10 last:border-b-0">
-                        <div className="flex items-center gap-3">
-                          <span className="text-sm text-on-surface-variant w-12">{hour.time}</span>
-                          <Tooltip
-                            text={hour.description}
-                            ariaLabel={`Weather: ${hour.description}`}
-                            icon={hour.icon}
-                          />
-                          <span className="text-sm text-on-surface-variant capitalize hidden sm:inline">{hour.description}</span>
+                      <div key={`${day.day}-${hour.time}`} className="flex flex-col py-2 border-b border-outline-variant/10 last:border-b-0">
+                        {/* Row 1: time, icon, description, temperature */}
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <span className="text-sm text-on-surface-variant w-12">{hour.time}</span>
+                            <Tooltip
+                              text={hour.description}
+                              ariaLabel={`Weather: ${hour.description}`}
+                              icon={hour.icon}
+                            />
+                            <span className="text-sm text-on-surface capitalize">{hour.description}</span>
+                          </div>
+                          <span className="text-on-surface font-medium">{hour.temp}°</span>
                         </div>
-                        <div className="flex items-center gap-4">
-                          {hour.precipitation > 0 && (
-                            <div className="flex items-center gap-1 text-on-surface-variant text-xs">
-                              <span className="material-symbols-outlined text-sm">water_drop</span>
-                              <span>{formatPrecipitation(hour.precipitation)}</span>
+                        {/* Row 2: precipitation, humidity, wind on left — feels like on right */}
+                        <div className="flex items-center justify-between mt-1 pl-[3.75rem] text-xs text-on-surface-variant">
+                          <div className="flex items-center gap-4">
+                            {hour.precipitation > 0 && (
+                              <div className="flex items-center gap-1">
+                                <span className="material-symbols-outlined text-xs">water_drop</span>
+                                <span>{formatPrecipitation(hour.precipitation)}</span>
+                              </div>
+                            )}
+                            <div className="flex items-center gap-1">
+                              <span className="material-symbols-outlined text-xs">humidity_percentage</span>
+                              <span>{hour.humidity}%</span>
                             </div>
-                          )}
-                          <div className="flex items-center gap-1 text-on-surface-variant text-xs">
-                            <span className="material-symbols-outlined text-sm">air</span>
-                            <span>{hour.wind}{hour.gust ? ` (↑${hour.gust})` : ''}{distanceTime}</span>
+                            <div className="flex items-center gap-1">
+                              <span className="material-symbols-outlined text-xs">air</span>
+                              <span>{hour.wind}{hour.gust ? ` (↑${hour.gust})` : ''}{distanceTime}</span>
+                            </div>
                           </div>
-                          <div className="flex items-center gap-1 text-on-surface-variant text-xs hidden sm:flex">
-                            <span className="material-symbols-outlined text-sm">humidity_percentage</span>
-                            <span>{hour.humidity}%</span>
-                          </div>
-                          
-                          <div className="flex flex-col items-end">
-                            <span className="text-on-surface font-medium">{hour.temp}°</span>
-                            <span className="text-on-surface-variant text-xs">Feels {hour.feelsLike}°</span>
+                          <div className="flex items-center gap-1">
+                            <span className="material-symbols-outlined text-xs">thermostat</span>
+                            <span>Feels {hour.feelsLike}°</span>
                           </div>
                         </div>
                       </div>
