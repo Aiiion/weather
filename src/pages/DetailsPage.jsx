@@ -2,6 +2,9 @@ import { useMemo } from "react";
 import { translateEpochDayShort } from "../helpers.js";
 import WindCard from "../components/WindCard/WindCard.jsx";
 import HumidityCard from "../components/HumidityCard/HumidityCard.jsx";
+import UVIndexCard from "../components/UVIndexCard/UVIndexCard.jsx";
+import VisibilityCard from "../components/VisibilityCard/VisibilityCard.jsx";
+import PressureCard from "../components/PressureCard/PressureCard.jsx";
 
 const AQI_LABELS = ["", "Good", "Fair", "Moderate", "Poor", "Very Poor"];
 const AQI_DESCRIPTIONS = [
@@ -113,32 +116,7 @@ function DetailsPage({ loading, weather, forecast, distanceTime, measure, pollut
   const sunrise = weather?.sunrise ?? null;
   const sunset = weather?.sunset ?? null;
   const visibilityM = weather?.visibility ?? null; // meters
-  const visibilityFormatted = visibilityM != null
-    ? measure === "°F"
-      ? `${(visibilityM / 1609.34).toFixed(1)} mi`
-      : `${(visibilityM / 1000).toFixed(1)} km`
-    : null;
-  const visibilityLabel = visibilityM != null
-    ? visibilityM >= 10000
-      ? "Perfectly clear"
-      : visibilityM >= 5000
-      ? "Good"
-      : visibilityM >= 2000
-      ? "Moderate"
-      : "Poor"
-    : null;
   const uvIndex = weather?.uv ?? null;
-  const uvLabel = uvIndex != null
-    ? uvIndex >= 11
-      ? "Extreme"
-      : uvIndex >= 8
-      ? "Very High"
-      : uvIndex >= 6
-      ? "High"
-      : uvIndex >= 3
-      ? "Moderate"
-      : "Low"
-    : null;
 
   // Max/min across today's forecast
   const todayData = dailyForecast[0];
@@ -188,58 +166,19 @@ function DetailsPage({ loading, weather, forecast, distanceTime, measure, pollut
         <h3 className="text-on-surface font-['Inter'] text-base font-semibold">Atmospheric Details</h3>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           {/* UV Index */}
-          <div className="p-5 bg-surface-container-low asymmetric-radius flex flex-col justify-between min-h-[120px]">
-            <div className="flex items-center gap-2">
-              <span className="material-symbols-outlined text-[1.25rem] text-on-surface-variant">light_mode</span>
-              <span className="text-on-surface-variant font-['Inter'] text-[0.6875rem] font-bold uppercase tracking-[0.05em]">UV Index</span>
-            </div>
-            <div>
-              <div className="text-[1.5rem] font-semibold text-on-surface">
-                {loading ? skeleton() : uvIndex != null ? uvIndex : "N/A"}
-              </div>
-              <div className="text-on-tertiary-container text-[0.75rem]">
-                {!loading && uvLabel ? uvLabel : !loading ? "Not available" : ""}
-              </div>
-            </div>
-          </div>
+          <UVIndexCard loading={loading} uvIndex={uvIndex} />
 
           {/* Humidity */}
           <HumidityCard loading={loading} humidity={currentHumidity} />
 
           {/* Visibility */}
-          <div className="p-5 bg-surface-container-low asymmetric-radius flex flex-col justify-between min-h-[120px]">
-            <div className="flex items-center gap-2">
-              <span className="material-symbols-outlined text-[1.25rem] text-on-surface-variant">visibility</span>
-              <span className="text-on-surface-variant font-['Inter'] text-[0.6875rem] font-bold uppercase tracking-[0.05em]">Visibility</span>
-            </div>
-            <div>
-              <div className="text-[1.5rem] font-semibold text-on-surface">
-                {loading ? skeleton() : visibilityFormatted ?? "N/A"}
-              </div>
-              <div className="text-on-tertiary-container text-[0.75rem]">
-                {!loading && visibilityLabel}
-              </div>
-            </div>
-          </div>
+          <VisibilityCard loading={loading} visibilityM={visibilityM} measure={measure} />
 
           {/* Wind */}
           <WindCard loading={loading} speed={currentWind} gust={windGust} deg={windDeg} distanceTime={distanceTime} />
 
           {/* Pressure */}
-          <div className="p-5 bg-surface-container-low asymmetric-radius flex flex-col justify-between min-h-[120px]">
-            <div className="flex items-center gap-2">
-              <span className="material-symbols-outlined text-[1.25rem] text-on-surface-variant">compress</span>
-              <span className="text-on-surface-variant font-['Inter'] text-[0.6875rem] font-bold uppercase tracking-[0.05em]">Pressure</span>
-            </div>
-            <div>
-              <div className="text-[1.5rem] font-semibold text-on-surface">
-                {loading ? skeleton() : pressure != null ? `${pressure}` : "--"}
-              </div>
-              <div className="text-on-tertiary-container text-[0.75rem]">
-                {pressure != null ? "hPa" : ""}
-              </div>
-            </div>
-          </div>
+          <PressureCard loading={loading} pressure={pressure} />
 
           {/* Sunrise */}
           <div className="p-5 bg-surface-container-low asymmetric-radius flex flex-col justify-between min-h-[120px]">
