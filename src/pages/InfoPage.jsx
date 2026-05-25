@@ -12,12 +12,7 @@ const formatProviders = (providers) => {
 
 function InfoPage({ weather, weatherWarning, loading, onBack }) {
   const weatherProvider = formatProviders(weather?.providers);
-  const warningProviders = Array.isArray(weatherWarning?.providers)
-    ? weatherWarning.providers
-    : weatherWarning?.providers
-    ? [String(weatherWarning.providers)]
-    : null;
-
+  const warningProvider = weatherWarning?.provider;
   return (
     <div className="pt-2 pb-4 space-y-16">
       {/* Data Sources */}
@@ -39,6 +34,7 @@ function InfoPage({ weather, weatherWarning, loading, onBack }) {
               <h4 className="text-lg font-semibold text-on-surface">Weather</h4>
               <p className="text-sm text-on-surface-variant">
                 Real-time atmospheric modeling and hyper-local forecasting.
+                We aggregate data from multiple global and regional weather services to provide the most accurate and up-to-date weather information for your location.
               </p>
             </div>
             <div className="mt-8">
@@ -78,24 +74,26 @@ function InfoPage({ weather, weatherWarning, loading, onBack }) {
                   warning
                 </span>
                 <h4 className="text-lg font-semibold text-on-surface">Warnings</h4>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold tracking-[0.05em] uppercase bg-secondary-container text-on-secondary-container">Beta</span>
               </div>
               <p className="text-sm text-on-surface-variant max-w-md">
-                Critical alerts and meteorological hazards aggregated from national
-                and global weather warning systems.
+                Critical alerts and meteorological hazards aggregated from national weather warning systems where available, falling back to global sources.
               </p>
+              <br />
+              <span className="text-xs text-on-surface-variant">
+                This feature is in beta, always cross-reference with official sources for critical information.
+              </span>
             </div>
             <div className="flex gap-2 flex-wrap">
               {loading ? (
                 <span className="inline-block h-6 w-24 bg-surface-container rounded-full animate-pulse" />
-              ) : warningProviders ? (
-                warningProviders.map((p) => (
-                  <span
-                    key={p}
-                    className="px-3 py-1 bg-surface-container-highest rounded-full text-[10px] font-bold tracking-[0.05em] uppercase text-on-surface-variant"
-                  >
-                    {p}
-                  </span>
-                ))
+              ) : warningProvider ? (
+                <span
+                  key={warningProvider}
+                  className="text-xs font-bold tracking-[0.05em] uppercase text-tertiary"
+                >
+                  {warningProvider}
+                </span>
               ) : (
                 <>
                   <span
