@@ -6,6 +6,7 @@ import UVIndexCard from "../components/UVIndexCard/UVIndexCard.jsx";
 import VisibilityCard from "../components/VisibilityCard/VisibilityCard.jsx";
 import PressureCard from "../components/PressureCard/PressureCard.jsx";
 import SunriseCard from "../components/SunriseCard/SunriseCard.jsx";
+import WeatherWarningsCard from "../components/WeatherWarningsCard/WeatherWarningsCard.jsx";
 
 const AQI_LABELS = ["", "Good", "Fair", "Moderate", "Poor", "Very Poor"];
 const AQI_DESCRIPTIONS = [
@@ -54,7 +55,7 @@ function AirQualityCard({ loading, pollution }) {
   );
 }
 
-function DetailsPage({ loading, weather, forecast, distanceTime, measure, pollution }) {
+function DetailsPage({ loading, weather, forecast, distanceTime, measure, pollution, weatherWarning }) {
   const dailyForecast = useMemo(() => {
     if (!forecast || forecast.length === 0) return [];
     return forecast
@@ -170,6 +171,9 @@ function DetailsPage({ loading, weather, forecast, distanceTime, measure, pollut
 
           {/* Pressure */}
           <PressureCard loading={loading} pressure={pressure} />
+
+          {/* Warnings */}
+          <WeatherWarningsCard loading={loading} weatherWarning={weatherWarning} />
 
           {/* Sunrise / Sunset */}
           <SunriseCard loading={loading} sunrise={sunrise} sunset={sunset} className="col-span-2 md:col-span-1" />
