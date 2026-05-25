@@ -163,6 +163,44 @@ function InfoPage({ weather, weatherWarning, loading, onBack }) {
           </a>
         </div>
       </section>
+      {/* Data Policy */}
+      <section className="space-y-8">
+        <div className="flex items-center justify-between">
+          <h3 className="text-xs font-bold tracking-[0.05em] uppercase text-on-surface-variant">
+            Data Policy
+          </h3>
+          <span className="h-[1px] flex-grow ml-4 bg-outline-variant/15"></span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* What we collect */}
+          <div className="asymmetric-radius bg-surface-container-low p-6 flex flex-col gap-3 hover:bg-surface-container transition-colors duration-300">
+            <span className="material-symbols-outlined text-secondary text-3xl">database</span>
+            <h4 className="text-lg font-semibold text-on-surface">What We Collect</h4>
+            <p className="text-sm text-on-surface-variant">
+              We log basic request metadata for each API call — including your IP address, user agent, and query parameters such as coordinates and unit preferences. Logs are retained for six months and then permanently deleted.
+            </p>
+          </div>
+
+          {/* Why we collect */}
+          <div className="asymmetric-radius bg-surface-container-low p-6 flex flex-col gap-3 hover:bg-surface-container transition-colors duration-300">
+            <span className="material-symbols-outlined text-secondary text-3xl">monitoring</span>
+            <h4 className="text-lg font-semibold text-on-surface">Why We Collect It</h4>
+            <p className="text-sm text-on-surface-variant">
+              Usage data helps us understand how the app is used in practice, identify areas for improvement, and ensure the service remains reliable. We do not use this data for advertising or share it with third parties.
+            </p>
+          </div>
+
+          {/* Provider shielding */}
+          <div className="asymmetric-radius bg-surface-container-low p-6 md:col-span-2 flex flex-col gap-3 hover:bg-surface-container transition-colors duration-300">
+            <span className="material-symbols-outlined text-secondary text-3xl">shield</span>
+            <h4 className="text-lg font-semibold text-on-surface">Provider Shielding</h4>
+            <p className="text-sm text-on-surface-variant max-w-2xl">
+              Your requests are routed exclusively through our backend — weather data providers never receive your IP address or any personally identifiable information. We act as a privacy-preserving intermediary between you and the underlying data sources.
+            </p>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
