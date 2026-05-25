@@ -2,10 +2,14 @@ import { memo } from "react";
 import { translateEpochTime } from "../../helpers.js";
 
 function SunriseCard({ loading, sunrise, sunset, className = "" }) {
-  const daylightText =
-    !loading && sunrise && sunset
-      ? `${Math.floor((sunset - sunrise) / 3600)}h ${Math.round(((sunset - sunrise) % 3600) / 60)}m of daylight`
-      : "";
+  const daylightText = !loading && sunrise && sunset
+    ? (() => {
+        const totalMinutes = Math.round((sunset - sunrise) / 60);
+        const hours = Math.floor(totalMinutes / 60);
+        const minutes = totalMinutes % 60;
+        return `${hours}h ${minutes}m of daylight`;
+      })()
+    : "";
 
   return (
     <div className={`p-5 bg-surface-container-low asymmetric-radius flex flex-col justify-between min-h-[120px] ${className}`}>
