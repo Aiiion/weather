@@ -1,5 +1,8 @@
 import { useState, useMemo } from "react";
 import Tooltip from "../components/Tooltip/Tooltip.jsx";
+import WindCard from "../components/WindCard/WindCard.jsx";
+import HumidityCard from "../components/HumidityCard/HumidityCard.jsx";
+import SunriseCard from "../components/SunriseCard/SunriseCard.jsx";
 import { translateEpochTime, translateEpochDayShort, getWeatherIcon } from "../helpers.js";
 
 const formatPrecipitation = (amount) => {
@@ -106,71 +109,13 @@ function WeatherPage({ loading, weather, precipitation, forecast, distanceTime }
       {/* Bento Grid Data Points */}
       <section className="grid grid-cols-2 gap-4 mb-16 lg:grid-cols-4 lg:gap-6">
         {/* Wind */}
-        <div className="asymmetric-radius bg-surface-container-low p-5 flex flex-col justify-between h-32">
-          <div className="flex justify-between items-start">
-            <span className="font-['Inter'] text-[0.6875rem] font-bold uppercase tracking-[0.05em] text-on-surface-variant">Wind</span>
-            <span className="material-symbols-outlined text-secondary text-xl">air</span>
-          </div>
-          <div>
-            <div className="text-xl font-semibold text-on-surface">
-              {loading ? (
-                <span className="inline-block h-6 w-16 bg-surface-container rounded animate-pulse"></span>
-              ) : weather ? (
-                `${weather.wind.speed.toFixed(1)}${distanceTime}`
-              ) : '--'}
-            </div>
-            {!loading && weather?.wind?.gust && (
-              <div className="text-xs text-on-surface-variant mt-1">
-                Gusts {weather.wind.gust.toFixed(1)}{distanceTime}
-              </div>
-            )}
-          </div>
-        </div>
+        <WindCard loading={loading} speed={weather?.wind?.speed} gust={weather?.wind?.gust} deg={weather?.wind?.deg} distanceTime={distanceTime} />
 
         {/* Humidity */}
-        <div className="asymmetric-radius bg-surface-container-low p-5 flex flex-col justify-between h-32">
-          <div className="flex justify-between items-start">
-            <span className="font-['Inter'] text-[0.6875rem] font-bold uppercase tracking-[0.05em] text-on-surface-variant">Humidity</span>
-            <span className="material-symbols-outlined text-secondary text-xl">humidity_low</span>
-          </div>
-          <div className="text-xl font-semibold text-on-surface">
-            {loading ? (
-              <span className="inline-block h-6 w-12 bg-surface-container rounded animate-pulse"></span>
-            ) : weather ? (
-              `${weather.humidity}%`
-            ) : '--'}
-          </div>
-        </div>
+        <HumidityCard loading={loading} humidity={weather?.humidity} />
 
         {/* Sunrise / Sunset Spanning Card */}
-        <div className="col-span-2 asymmetric-radius bg-surface-container p-5 flex flex-col justify-between h-32">
-          <div className="flex justify-between items-start">
-            <span className="font-['Inter'] text-[0.6875rem] font-bold uppercase tracking-[0.05em] text-on-surface-variant">Sunrise</span>
-            <span className="font-['Inter'] text-[0.6875rem] font-bold uppercase tracking-[0.05em] text-on-surface-variant">Sunset</span>
-          </div>
-          <div className="flex justify-between items-end">
-            <div className="flex items-center gap-2">
-              <span className="material-symbols-outlined text-tertiary">wb_twilight</span>
-              <span className="text-xl font-semibold text-on-surface">
-                {loading ? (
-                  <span className="inline-block h-6 w-14 bg-surface-container-low rounded animate-pulse"></span>
-                ) : weather ? (
-                  translateEpochTime(weather.sunrise)
-                ) : '--'}
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-xl font-semibold text-on-surface">
-                {loading ? (
-                  <span className="inline-block h-6 w-14 bg-surface-container-low rounded animate-pulse"></span>
-                ) : weather ? (
-                  translateEpochTime(weather.sunset)
-                ) : '--'}
-              </span>
-              <span className="material-symbols-outlined text-secondary">nights_stay</span>
-            </div>
-          </div>
-        </div>
+        <SunriseCard loading={loading} sunrise={weather?.sunrise} sunset={weather?.sunset} className="col-span-2" />
       </section>
 
       {/* Forecast Section */}
@@ -227,35 +172,39 @@ function WeatherPage({ loading, weather, precipitation, forecast, distanceTime }
                     day.isFirst ? 'border-t border-outline-variant/20' : ''
                   }`}>
                     {day.hourlyData.map((hour, hIdx) => (
-                      <div key={`${day.day}-${hour.time}`} className="flex items-center justify-between py-2 border-b border-outline-variant/10 last:border-b-0">
-                        <div className="flex items-center gap-3">
-                          <span className="text-sm text-on-surface-variant w-12">{hour.time}</span>
-                          <Tooltip
-                            text={hour.description}
-                            ariaLabel={`Weather: ${hour.description}`}
-                            icon={hour.icon}
-                          />
-                          <span className="text-sm text-on-surface-variant capitalize hidden sm:inline">{hour.description}</span>
+                      <div key={`${day.day}-${hour.time}`} className="flex flex-col py-2 border-b border-outline-variant/10 last:border-b-0">
+                        {/* Row 1: time, icon, description, temperature */}
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <span className="text-sm font-bold text-on-surface-variant w-12">{hour.time.split(':')[0]}</span>
+                            <Tooltip
+                              text={hour.description}
+                              ariaLabel={`Weather: ${hour.description}`}
+                              icon={hour.icon}
+                            />
+                            <span className="text-sm text-on-surface capitalize">{hour.description}</span>
+                          </div>
+                          <span className="text-on-surface font-medium">{hour.temp}°</span>
                         </div>
-                        <div className="flex items-center gap-4">
-                          {hour.precipitation > 0 && (
-                            <div className="flex items-center gap-1 text-on-surface-variant text-xs">
-                              <span className="material-symbols-outlined text-sm">water_drop</span>
+                        {/* Row 2: precipitation, humidity, wind on left — feels like on right */}
+                        <div className="flex items-center justify-between mt-1 text-xs text-on-surface-variant">
+                          <div className="flex items-center gap-4">
+                            <div className={`flex items-center gap-1 ${hour.precipitation > 0 ? '' : 'invisible'}`}>
+                              <span className="material-symbols-outlined text-xs">water_drop</span>
                               <span>{formatPrecipitation(hour.precipitation)}</span>
                             </div>
-                          )}
-                          <div className="flex items-center gap-1 text-on-surface-variant text-xs">
-                            <span className="material-symbols-outlined text-sm">air</span>
-                            <span>{hour.wind}{hour.gust ? ` (↑${hour.gust})` : ''}{distanceTime}</span>
+                            <div className="flex items-center gap-1">
+                              <span className="material-symbols-outlined text-xs">humidity_percentage</span>
+                              <span>{hour.humidity}%</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <span className="material-symbols-outlined text-xs">air</span>
+                              <span>{hour.wind}{hour.gust ? ` (↑${hour.gust})` : ''}{distanceTime}</span>
+                            </div>
                           </div>
-                          <div className="flex items-center gap-1 text-on-surface-variant text-xs hidden sm:flex">
-                            <span className="material-symbols-outlined text-sm">humidity_percentage</span>
-                            <span>{hour.humidity}%</span>
-                          </div>
-                          
-                          <div className="flex flex-col items-end">
-                            <span className="text-on-surface font-medium">{hour.temp}°</span>
-                            <span className="text-on-surface-variant text-xs">Feels {hour.feelsLike}°</span>
+                          <div className="flex items-center gap-1">
+                            <span className="material-symbols-outlined text-xs">thermostat</span>
+                            <span>Feels {hour.feelsLike}°</span>
                           </div>
                         </div>
                       </div>
