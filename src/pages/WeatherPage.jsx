@@ -231,7 +231,7 @@ function WeatherPage({ loading, weather, precipitation, forecast, distanceTime }
                         {/* Row 1: time, icon, description, temperature */}
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
-                            <span className="text-sm text-on-surface-variant w-12">{hour.time}</span>
+                            <span className="text-sm font-bold text-on-surface-variant w-12">{hour.time.split(':')[0]}</span>
                             <Tooltip
                               text={hour.description}
                               ariaLabel={`Weather: ${hour.description}`}
@@ -242,14 +242,12 @@ function WeatherPage({ loading, weather, precipitation, forecast, distanceTime }
                           <span className="text-on-surface font-medium">{hour.temp}°</span>
                         </div>
                         {/* Row 2: precipitation, humidity, wind on left — feels like on right */}
-                        <div className="flex items-center justify-between mt-1 pl-[3.75rem] text-xs text-on-surface-variant">
+                        <div className="flex items-center justify-between mt-1 text-xs text-on-surface-variant">
                           <div className="flex items-center gap-4">
-                            {hour.precipitation > 0 && (
-                              <div className="flex items-center gap-1">
-                                <span className="material-symbols-outlined text-xs">water_drop</span>
-                                <span>{formatPrecipitation(hour.precipitation)}</span>
-                              </div>
-                            )}
+                            <div className={`flex items-center gap-1 ${hour.precipitation > 0 ? '' : 'invisible'}`}>
+                              <span className="material-symbols-outlined text-xs">water_drop</span>
+                              <span>{formatPrecipitation(hour.precipitation)}</span>
+                            </div>
                             <div className="flex items-center gap-1">
                               <span className="material-symbols-outlined text-xs">humidity_percentage</span>
                               <span>{hour.humidity}%</span>
