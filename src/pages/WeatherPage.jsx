@@ -1,5 +1,7 @@
 import { useState, useMemo } from "react";
 import Tooltip from "../components/Tooltip/Tooltip.jsx";
+import WindCard from "../components/WindCard/WindCard.jsx";
+import HumidityCard from "../components/HumidityCard/HumidityCard.jsx";
 import { translateEpochTime, translateEpochDayShort, getWeatherIcon } from "../helpers.js";
 
 const formatPrecipitation = (amount) => {
@@ -106,41 +108,10 @@ function WeatherPage({ loading, weather, precipitation, forecast, distanceTime }
       {/* Bento Grid Data Points */}
       <section className="grid grid-cols-2 gap-4 mb-16 lg:grid-cols-4 lg:gap-6">
         {/* Wind */}
-        <div className="asymmetric-radius bg-surface-container-low p-5 flex flex-col justify-between h-32">
-          <div className="flex justify-between items-start">
-            <span className="font-['Inter'] text-[0.6875rem] font-bold uppercase tracking-[0.05em] text-on-surface-variant">Wind</span>
-            <span className="material-symbols-outlined text-secondary text-xl">air</span>
-          </div>
-          <div>
-            <div className="text-xl font-semibold text-on-surface">
-              {loading ? (
-                <span className="inline-block h-6 w-16 bg-surface-container rounded animate-pulse"></span>
-              ) : weather ? (
-                `${weather.wind.speed.toFixed(1)}${distanceTime}`
-              ) : '--'}
-            </div>
-            {!loading && weather?.wind?.gust && (
-              <div className="text-xs text-on-surface-variant mt-1">
-                Gusts {weather.wind.gust.toFixed(1)}{distanceTime}
-              </div>
-            )}
-          </div>
-        </div>
+        <WindCard loading={loading} speed={weather?.wind?.speed} gust={weather?.wind?.gust} deg={weather?.wind?.deg} distanceTime={distanceTime} />
 
         {/* Humidity */}
-        <div className="asymmetric-radius bg-surface-container-low p-5 flex flex-col justify-between h-32">
-          <div className="flex justify-between items-start">
-            <span className="font-['Inter'] text-[0.6875rem] font-bold uppercase tracking-[0.05em] text-on-surface-variant">Humidity</span>
-            <span className="material-symbols-outlined text-secondary text-xl">humidity_low</span>
-          </div>
-          <div className="text-xl font-semibold text-on-surface">
-            {loading ? (
-              <span className="inline-block h-6 w-12 bg-surface-container rounded animate-pulse"></span>
-            ) : weather ? (
-              `${weather.humidity}%`
-            ) : '--'}
-          </div>
-        </div>
+        <HumidityCard loading={loading} humidity={weather?.humidity} />
 
         {/* Sunrise / Sunset Spanning Card */}
         <div className="col-span-2 asymmetric-radius bg-surface-container p-5 flex flex-col justify-between h-32">

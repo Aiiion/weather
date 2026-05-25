@@ -1,5 +1,7 @@
 import { useMemo } from "react";
 import { translateEpochDayShort } from "../helpers.js";
+import WindCard from "../components/WindCard/WindCard.jsx";
+import HumidityCard from "../components/HumidityCard/HumidityCard.jsx";
 
 const AQI_LABELS = ["", "Good", "Fair", "Moderate", "Poor", "Very Poor"];
 const AQI_DESCRIPTIONS = [
@@ -145,12 +147,6 @@ function DetailsPage({ loading, weather, forecast, distanceTime, measure, pollut
 
   const windGust = weather?.wind?.gust ?? null;
   const windDeg = weather?.wind?.deg ?? null;
-  const getWindDirection = (deg) => {
-    if (deg == null) return null;
-    const dirs = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
-    return dirs[Math.round(deg / 45) % 8];
-  };
-  const windDir = getWindDirection(windDeg);
 
   const formatTime = (epoch) => {
     if (!epoch) return "--";
@@ -208,28 +204,7 @@ function DetailsPage({ loading, weather, forecast, distanceTime, measure, pollut
           </div>
 
           {/* Humidity */}
-          <div className="p-5 bg-surface-container-low asymmetric-radius flex flex-col justify-between min-h-[120px]">
-            <div className="flex items-center gap-2">
-              <span className="material-symbols-outlined text-[1.25rem] text-on-surface-variant">humidity_percentage</span>
-              <span className="text-on-surface-variant font-['Inter'] text-[0.6875rem] font-bold uppercase tracking-[0.05em]">Humidity</span>
-            </div>
-            <div>
-              <div className="text-[1.5rem] font-semibold text-on-surface">
-                {loading ? skeleton() : currentHumidity != null ? `${currentHumidity}%` : "--"}
-              </div>
-              <div className="text-on-tertiary-container text-[0.75rem]">
-                {currentHumidity != null
-                  ? currentHumidity > 80
-                    ? "Very humid"
-                    : currentHumidity > 60
-                    ? "Humid"
-                    : currentHumidity > 40
-                    ? "Comfortable"
-                    : "Dry"
-                  : ""}
-              </div>
-            </div>
-          </div>
+          <HumidityCard loading={loading} humidity={currentHumidity} />
 
           {/* Visibility */}
           <div className="p-5 bg-surface-container-low asymmetric-radius flex flex-col justify-between min-h-[120px]">
@@ -248,25 +223,7 @@ function DetailsPage({ loading, weather, forecast, distanceTime, measure, pollut
           </div>
 
           {/* Wind */}
-          <div className="p-5 bg-surface-container-low asymmetric-radius flex flex-col justify-between min-h-[120px]">
-            <div className="flex items-center gap-2">
-              <span className="material-symbols-outlined text-[1.25rem] text-on-surface-variant">air</span>
-              <span className="text-on-surface-variant font-['Inter'] text-[0.6875rem] font-bold uppercase tracking-[0.05em]">Wind</span>
-            </div>
-            <div>
-              <div className="text-[1.5rem] font-semibold text-on-surface">
-                {loading ? skeleton() : currentWind != null ? (
-                  <>{currentWind.toFixed(1)} <span className="text-[0.875rem]">{distanceTime}</span></>
-                ) : "--"}
-              </div>
-              <div className="text-on-tertiary-container text-[0.75rem]">
-                {windDir ? `From ${windDir}` : ""}
-                {windGust != null && (
-                  <span>{windDir ? " · " : ""}{`Gusts ${windGust.toFixed(1)} ${distanceTime}`}</span>
-                )}
-              </div>
-            </div>
-          </div>
+          <WindCard loading={loading} speed={currentWind} gust={windGust} deg={windDeg} distanceTime={distanceTime} />
 
           {/* Pressure */}
           <div className="p-5 bg-surface-container-low asymmetric-radius flex flex-col justify-between min-h-[120px]">
