@@ -120,9 +120,10 @@ function App() {
     abortControllerRef.current = controller;
     setPermissionStatus("pending");
     setLoading(true);
+    setError(false);
     fetch(IP_LOCATION_URL, { signal: controller.signal })
       .then(toJSON)
-      .then(({ lat, lon }) => cacheCoords({ lat, lon }))
+      .then(({ data }) => cacheCoords({ lat: data.lat, lon: data.lon }))
       .then(() => getWeatherData(measure, controller.signal))
       .catch((err) => {
         if (err.name === "AbortError") return;
