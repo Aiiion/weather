@@ -212,7 +212,7 @@ function App() {
             {permissionStatus === "denied" && !loading && (
               <button
                 onClick={getLocationFromIp}
-                className="text-xs text-on-surface-variant hover:text-primary transition-colors text-left"
+                className="text-xs text-on-surface-variant hover:text-primary border border-surface-container-high hover:border-primary transition-colors rounded-full px-3 py-1 text-left w-fit"
               >
                 Get location from IP address instead
               </button>
