@@ -5,7 +5,7 @@ import WeatherPage from "./pages/WeatherPage.jsx";
 import DetailsPage from "./pages/DetailsPage.jsx";
 import InfoPage from "./pages/InfoPage.jsx";
 import { useEffect, useState, useRef } from "react";
-import { BASE_URL } from "./constants.js";
+import { BASE_URL, IP_LOCATION_URL } from "./constants.js";
 
 const createApiUrl = ({ lat, lon }, measureValue) => {
   const units = measureValue == "°C" ? "metric" : "imperial";
@@ -111,6 +111,25 @@ function App() {
     coordsRef.current = coords;
     return coords;
   };
+
+  const getLocationFromIp = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+    setPermissionStatus("pending");
+    setLoading(true);
+    fetch(IP_LOCATION_URL, { signal: controller.signal })
+      .then(toJSON)
+      .then(({ lat, lon }) => cacheCoords({ lat, lon }))
+      .then(() => getWeatherData(measure, controller.signal))
+      .catch((err) => {
+        if (err.name === "AbortError") return;
+        setError(true);
+        setLoading(false);
+      });
+  };
   const getWeatherData = (measureValue, signal) => {
     setCity(null);
     getLatLon()
@@ -173,23 +192,33 @@ function App() {
         <div className="max-w-[1200px] mx-auto w-full flex justify-between items-center">
         <div className="flex items-center gap-2">
           <span className="material-symbols-outlined text-primary">location_on</span>
-          {loading ? (
-            <div className="h-6 w-32 bg-surface-container-low rounded animate-pulse"></div>
-          ) : (
-            <h1 className="font-['Inter'] font-semibold tracking-[-0.02em] text-[1.25rem] text-primary">
-              {city}
-              {weatherWarning && (
-                <span className="ml-2 inline-flex">
-                  <WarningIcon
-                    color={weatherWarning?.severity ?? undefined}
-                    title="Click for weather warning details"
-                    onClick={() => setIsWarningOpen(true)}
-                  />
-                </span>
-              )}
-            </h1>
-          )}
-  </div>
+          <div className="flex flex-col">
+            {loading ? (
+              <div className="h-6 w-32 bg-surface-container-low rounded animate-pulse"></div>
+            ) : (
+              <h1 className="font-['Inter'] font-semibold tracking-[-0.02em] text-[1.25rem] text-primary">
+                {city}
+                {weatherWarning && (
+                  <span className="ml-2 inline-flex">
+                    <WarningIcon
+                      color={weatherWarning?.severity ?? undefined}
+                      title="Click for weather warning details"
+                      onClick={() => setIsWarningOpen(true)}
+                    />
+                  </span>
+                )}
+              </h1>
+            )}
+            {permissionStatus === "denied" && !loading && (
+              <button
+                onClick={getLocationFromIp}
+                className="text-xs text-on-surface-variant hover:text-primary transition-colors text-left"
+              >
+                Get location from IP address instead
+              </button>
+            )}
+          </div>
+        </div>
   {error ? (
     <button
       onClick={refresh}
