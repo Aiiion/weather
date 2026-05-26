@@ -272,6 +272,7 @@ function App() {
             distanceTime={distanceTime}
             measure={measure}
             pollution={pollution}
+            weatherWarning={weatherWarning}
           />
         )}
         {activeNav === "info" && (
