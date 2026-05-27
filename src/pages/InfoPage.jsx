@@ -17,12 +17,20 @@ function InfoPage({ weather, weatherWarning, loading, onBack }) {
   const weatherProvider = formatProviders(weather?.providers);
   const warningProvider = weatherWarning?.provider;
   const device = getDevice();
-  const [showInstallGuide, setShowInstallGuide] = useState(
-    () => (device === 'android' || device === 'ios') && !localStorage.getItem('discardInstall')
-  );
+  const [showInstallGuide, setShowInstallGuide] = useState(() => {
+    try {
+      return (device === 'android' || device === 'ios') && !localStorage.getItem('discardInstall');
+    } catch {
+      return false;
+    }
+  });
 
   const dismissInstallGuide = () => {
-    localStorage.setItem('discardInstall', new Date().toISOString());
+    try {
+      localStorage.setItem('discardInstall', new Date().toISOString());
+    } catch {
+      // storage unavailable — proceed with in-memory dismiss only
+    }
     setShowInstallGuide(false);
   };
 
