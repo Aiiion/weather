@@ -19,7 +19,7 @@ function InfoPage({ weather, weatherWarning, loading, onBack }) {
   const device = getDevice();
   const [showInstallGuide, setShowInstallGuide] = useState(() => {
     try {
-      return (device === 'android' || device === 'ios') && !localStorage.getItem('discardInstall');
+      return (device === 'android' || device === 'ios' || device === 'ipados') && !localStorage.getItem('discardInstall');
     } catch {
       return false;
     }
@@ -34,7 +34,7 @@ function InfoPage({ weather, weatherWarning, loading, onBack }) {
     setShowInstallGuide(false);
   };
 
-  const installSteps = device === 'ios'
+  const installSteps = device === 'ios' || device === 'ipados'
     ? ['Open this page in Safari', 'Tap the Share button at the bottom', "Select 'Add to Home Screen'"]
     : device === 'android'
     ? ['Tap the menu (⋮) in your browser', "Select 'Add to Home Screen' or 'Install app'"]
