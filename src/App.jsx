@@ -6,6 +6,7 @@ import DetailsPage from "./pages/DetailsPage.jsx";
 import InfoPage from "./pages/InfoPage.jsx";
 import { useEffect, useState, useRef } from "react";
 import { BASE_URL, IP_LOCATION_URL } from "./constants.js";
+import { getDevice } from "./helpers.js";
 
 const createApiUrl = ({ lat, lon }, measureValue) => {
   const units = measureValue == "°C" ? "metric" : "imperial";
@@ -33,6 +34,28 @@ function App() {
   const [pollution, setPollution] = useState(null);
   const [activeNav, setActiveNav] = useState("weather");
   const abortControllerRef = useRef(null);
+  const [installPrompt, setInstallPrompt] = useState(null);
+  const [showInstallBanner, setShowInstallBanner] = useState(false);
+
+  useEffect(() => {
+    if (getDevice() !== "android") return;
+    const handler = (e) => {
+      e.preventDefault();
+      setInstallPrompt(e);
+      setShowInstallBanner(true);
+    };
+    window.addEventListener("beforeinstallprompt", handler);
+    return () => window.removeEventListener("beforeinstallprompt", handler);
+  }, []);
+
+  const handleInstall = () => {
+    if (!installPrompt) return;
+    installPrompt.prompt();
+    installPrompt.userChoice.then(() => {
+      setInstallPrompt(null);
+      setShowInstallBanner(false);
+    });
+  };
 
   useEffect(() => {
     // Cancel any in-flight request
@@ -188,6 +211,30 @@ function App() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col overflow-x-hidden">
+      {/* Install Banner */}
+      {showInstallBanner && (
+        <div className="w-full bg-primary-container px-4 py-3 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <span className="material-symbols-outlined text-on-primary-container text-xl">install_mobile</span>
+            <p className="text-sm font-medium text-on-primary-container">Install the app for a better experience</p>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={handleInstall}
+              className="text-sm font-semibold text-primary bg-on-primary-container px-3 py-1.5 rounded-full transition-opacity hover:opacity-80"
+            >
+              Install
+            </button>
+            <button
+              onClick={() => setShowInstallBanner(false)}
+              aria-label="Dismiss"
+              className="text-on-primary-container hover:opacity-70 transition-opacity"
+            >
+              <span className="material-symbols-outlined text-xl">close</span>
+            </button>
+          </div>
+        </div>
+      )}
       {/* TopAppBar */}
       <header className="bg-background flex justify-between items-center px-4 py-4 w-full box-border">
         <div className="max-w-[1200px] mx-auto w-full flex justify-between items-center">
