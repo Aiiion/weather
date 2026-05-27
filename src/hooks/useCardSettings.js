@@ -1,0 +1,38 @@
+import { useState, useCallback } from "react";
+
+const STORAGE_PREFIX = "settings.cards.";
+
+export const CARD_DEFAULTS = {
+  Wind: true,
+  Humidity: true,
+  Sunrise: true,
+  UVIndex: false,
+  Visibility: false,
+  Pressure: false,
+  WeatherWarnings: false,
+};
+
+function readSettings() {
+  const result = { ...CARD_DEFAULTS };
+  for (const key of Object.keys(CARD_DEFAULTS)) {
+    const stored = localStorage.getItem(STORAGE_PREFIX + key);
+    if (stored !== null) {
+      result[key] = stored === "true";
+    }
+  }
+  return result;
+}
+
+export function useCardSettings() {
+  const [settings, setSettings] = useState(readSettings);
+
+  const toggleCard = useCallback((cardKey) => {
+    setSettings((prev) => {
+      const next = { ...prev, [cardKey]: !prev[cardKey] };
+      localStorage.setItem(STORAGE_PREFIX + cardKey, String(next[cardKey]));
+      return next;
+    });
+  }, []);
+
+  return { settings, toggleCard };
+}

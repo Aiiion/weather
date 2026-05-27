@@ -4,9 +4,11 @@ import WarningModal from "./components/WarningModal/WarningModal.jsx";
 import WeatherPage from "./pages/WeatherPage.jsx";
 import DetailsPage from "./pages/DetailsPage.jsx";
 import InfoPage from "./pages/InfoPage.jsx";
+import SettingsPage from "./pages/SettingsPage.jsx";
 import { useEffect, useState, useRef } from "react";
 import { BASE_URL, IP_LOCATION_URL } from "./constants.js";
 import { getDevice } from "./helpers.js";
+import { useCardSettings } from "./hooks/useCardSettings.js";
 
 const createApiUrl = ({ lat, lon }, measureValue) => {
   const units = measureValue == "°C" ? "metric" : "imperial";
@@ -33,6 +35,7 @@ function App() {
   const [precipitation, setPrecipitation] = useState(0);
   const [pollution, setPollution] = useState(null);
   const [activeNav, setActiveNav] = useState("weather");
+  const { settings: cardSettings, toggleCard } = useCardSettings();
   const abortControllerRef = useRef(null);
   const [installPrompt, setInstallPrompt] = useState(null);
   const [showInstallBanner, setShowInstallBanner] = useState(false);
@@ -314,6 +317,15 @@ function App() {
             precipitation={precipitation}
             forecast={forecast}
             distanceTime={distanceTime}
+            cardSettings={cardSettings}
+            measure={measure}
+            weatherWarning={weatherWarning}
+          />
+        )}
+        {activeNav === "settings" && (
+          <SettingsPage
+            settings={cardSettings}
+            onToggle={toggleCard}
           />
         )}
         {activeNav === "details" && (
@@ -360,6 +372,17 @@ function App() {
           }`}
         >
           <span className="material-symbols-outlined">table_rows</span>
+        </button>
+        <button 
+          onClick={() => setActiveNav("settings")}
+          aria-label="Settings"
+          className={`flex flex-col items-center justify-center p-3 rounded-2xl transition-all duration-200 ${
+            activeNav === "settings" 
+              ? 'bg-surface-bright text-tertiary' 
+              : 'text-on-surface-variant hover:text-primary'
+          }`}
+        >
+          <span className="material-symbols-outlined">settings</span>
         </button>
         <button 
           onClick={() => setActiveNav("info")}

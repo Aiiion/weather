@@ -3,6 +3,10 @@ import Tooltip from "../components/Tooltip/Tooltip.jsx";
 import WindCard from "../components/WindCard/WindCard.jsx";
 import HumidityCard from "../components/HumidityCard/HumidityCard.jsx";
 import SunriseCard from "../components/SunriseCard/SunriseCard.jsx";
+import UVIndexCard from "../components/UVIndexCard/UVIndexCard.jsx";
+import VisibilityCard from "../components/VisibilityCard/VisibilityCard.jsx";
+import PressureCard from "../components/PressureCard/PressureCard.jsx";
+import WeatherWarningsCard from "../components/WeatherWarningsCard/WeatherWarningsCard.jsx";
 import { translateEpochTime, translateEpochDayShort, getWeatherIcon } from "../helpers.js";
 
 const formatPrecipitation = (amount) => {
@@ -11,7 +15,7 @@ const formatPrecipitation = (amount) => {
   return `${Math.round(amount * 10) / 10}mm`;
 };
 
-function WeatherPage({ loading, weather, precipitation, forecast, distanceTime }) {
+function WeatherPage({ loading, weather, precipitation, forecast, distanceTime, cardSettings, measure, weatherWarning }) {
   const [expandedDay, setExpandedDay] = useState(null);
 
   const dailyForecast = useMemo(() => {
@@ -108,16 +112,13 @@ function WeatherPage({ loading, weather, precipitation, forecast, distanceTime }
 
       {/* Bento Grid Data Points */}
       <section className="grid grid-cols-2 gap-4 mb-16 lg:grid-cols-4 lg:gap-6">
-        {/* Wind */}
-        <WindCard loading={loading} speed={weather?.wind?.speed} gust={weather?.wind?.gust} deg={weather?.wind?.deg} distanceTime={distanceTime} />
-
-        {/* Humidity */}
-        <HumidityCard loading={loading} humidity={weather?.humidity} />
-
-        {/* Sunrise / Sunset Spanning Card */}
-        <div className="col-span-2 hidden sm:block">
-          <SunriseCard loading={loading} sunrise={weather?.sunrise} sunset={weather?.sunset} />
-        </div>
+        {cardSettings.Wind && <WindCard loading={loading} speed={weather?.wind?.speed} gust={weather?.wind?.gust} deg={weather?.wind?.deg} distanceTime={distanceTime} />}
+        {cardSettings.Humidity && <HumidityCard loading={loading} humidity={weather?.humidity} />}
+        {cardSettings.Sunrise && <SunriseCard loading={loading} sunrise={weather?.sunrise} sunset={weather?.sunset} className="col-span-2" />}
+        {cardSettings.UVIndex && <UVIndexCard loading={loading} uvIndex={weather?.uv} />}
+        {cardSettings.Visibility && <VisibilityCard loading={loading} visibilityM={weather?.visibility} measure={measure} />}
+        {cardSettings.Pressure && <PressureCard loading={loading} pressure={weather?.pressure} />}
+        {cardSettings.WeatherWarnings && <WeatherWarningsCard loading={loading} weatherWarning={weatherWarning} />}
       </section>
 
       {/* Forecast Section */}
