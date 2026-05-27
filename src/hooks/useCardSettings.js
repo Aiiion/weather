@@ -14,11 +14,15 @@ export const CARD_DEFAULTS = {
 
 function readSettings() {
   const result = { ...CARD_DEFAULTS };
-  for (const key of Object.keys(CARD_DEFAULTS)) {
-    const stored = localStorage.getItem(STORAGE_PREFIX + key);
-    if (stored !== null) {
-      result[key] = stored === "true";
+  try {
+    for (const key of Object.keys(CARD_DEFAULTS)) {
+      const stored = localStorage.getItem(STORAGE_PREFIX + key);
+      if (stored !== null) {
+        result[key] = stored === "true";
+      }
     }
+  } catch {
+    return { ...CARD_DEFAULTS };
   }
   return result;
 }
@@ -29,7 +33,11 @@ export function useCardSettings() {
   const toggleCard = useCallback((cardKey) => {
     setSettings((prev) => {
       const next = { ...prev, [cardKey]: !prev[cardKey] };
-      localStorage.setItem(STORAGE_PREFIX + cardKey, String(next[cardKey]));
+      try {
+        localStorage.setItem(STORAGE_PREFIX + cardKey, String(next[cardKey]));
+      } catch {
+        // storage unavailable; UI state still updates
+      }
       return next;
     });
   }, []);
