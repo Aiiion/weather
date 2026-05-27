@@ -1,4 +1,5 @@
-const VERSION = "v1.1.0";
+
+import { version } from '../../package.json';
 
 const formatProviders = (providers) => {
   if (!providers) return null;
@@ -77,7 +78,7 @@ function InfoPage({ weather, weatherWarning, loading, onBack }) {
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-bold tracking-[0.05em] uppercase bg-secondary-container text-on-secondary-container">Beta</span>
               </div>
               <p className="text-sm text-on-surface-variant max-w-md">
-                Critical alerts and meteorological hazards aggregated from national weather warning systems where available, falling back to global sources.
+                Critical alerts and meteorological hazards from national weather warning systems where available, falling back to global sources.
               </p>
               <br />
               <span className="text-xs text-on-surface-variant">
@@ -201,6 +202,8 @@ function InfoPage({ weather, weatherWarning, loading, onBack }) {
           </div>
         </div>
       </section>
+
+      <p className="text-center text-xs text-on-surface-variant/50">v{version}</p>
     </div>
   );
 }
