@@ -213,22 +213,22 @@ function App() {
     <div className="min-h-screen bg-background flex flex-col overflow-x-hidden">
       {/* Install Banner */}
       {showInstallBanner && (
-        <div className="w-full bg-primary-container px-4 py-3 flex items-center justify-between gap-3">
+        <div className="w-full bg-surface-container-high px-4 py-3 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <span className="material-symbols-outlined text-on-primary-container text-xl">install_mobile</span>
-            <p className="text-sm font-medium text-on-primary-container">Install the app for a better experience</p>
+            <span className="material-symbols-outlined text-secondary text-xl">install_mobile</span>
+            <p className="text-sm font-medium text-on-surface">Install the app for a better experience</p>
           </div>
           <div className="flex items-center gap-2 shrink-0">
             <button
               onClick={handleInstall}
-              className="text-sm font-semibold text-primary bg-on-primary-container px-3 py-1.5 rounded-full transition-opacity hover:opacity-80"
+              className="text-sm font-semibold text-black bg-white px-3 py-1.5 rounded-full transition-opacity hover:opacity-80"
             >
               Install
             </button>
             <button
               onClick={() => setShowInstallBanner(false)}
               aria-label="Dismiss"
-              className="text-on-primary-container hover:opacity-70 transition-opacity"
+              className="text-on-surface-variant hover:opacity-70 transition-opacity"
             >
               <span className="material-symbols-outlined text-xl">close</span>
             </button>
