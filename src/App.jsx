@@ -48,13 +48,17 @@ function App() {
     return () => window.removeEventListener("beforeinstallprompt", handler);
   }, []);
 
-  const handleInstall = () => {
+  const handleInstall = async () => {
     if (!installPrompt) return;
-    installPrompt.prompt();
-    installPrompt.userChoice.then(() => {
+    try {
+      await installPrompt.prompt();
+      await installPrompt.userChoice;
+    } catch {
+      // prompt was dismissed or unavailable — clean up silently
+    } finally {
       setInstallPrompt(null);
       setShowInstallBanner(false);
-    });
+    }
   };
 
   useEffect(() => {
