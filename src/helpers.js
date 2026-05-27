@@ -167,3 +167,11 @@ export const getWeatherIcon = (weatherData, isDay = true) => {
   // Final fallback to description parsing
   return getWeatherIconFromDescription(description || weather, isDayFromIcon);
 };
+
+export const getDevice = () => {
+  const ua = navigator.userAgent;
+  if (/android/i.test(ua)) return "android";
+  if (/ipad|iphone|ipod/i.test(ua)) return "ios";
+  if (/macintosh/i.test(ua) && navigator.maxTouchPoints > 1) return "ipados";
+  return "desktop";
+};

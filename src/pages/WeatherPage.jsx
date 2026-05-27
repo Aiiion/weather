@@ -115,7 +115,9 @@ function WeatherPage({ loading, weather, precipitation, forecast, distanceTime }
         <HumidityCard loading={loading} humidity={weather?.humidity} />
 
         {/* Sunrise / Sunset Spanning Card */}
-        <SunriseCard loading={loading} sunrise={weather?.sunrise} sunset={weather?.sunset} className="col-span-2" />
+        <div className="col-span-2 hidden sm:block">
+          <SunriseCard loading={loading} sunrise={weather?.sunrise} sunset={weather?.sunset} />
+        </div>
       </section>
 
       {/* Forecast Section */}

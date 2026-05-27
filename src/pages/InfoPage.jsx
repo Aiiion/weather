@@ -1,4 +1,7 @@
-const VERSION = "v1.1.0";
+
+import { version } from '../../package.json';
+import { useState } from 'react';
+import { getDevice } from '../helpers.js';
 
 const formatProviders = (providers) => {
   if (!providers) return null;
@@ -13,8 +16,58 @@ const formatProviders = (providers) => {
 function InfoPage({ weather, weatherWarning, loading, onBack }) {
   const weatherProvider = formatProviders(weather?.providers);
   const warningProvider = weatherWarning?.provider;
+  const device = getDevice();
+  const [showInstallGuide, setShowInstallGuide] = useState(() => {
+    try {
+      return (device === 'android' || device === 'ios' || device === 'ipados') && !localStorage.getItem('discardInstall');
+    } catch {
+      return false;
+    }
+  });
+
+  const dismissInstallGuide = () => {
+    try {
+      localStorage.setItem('discardInstall', new Date().toISOString());
+    } catch {
+      // storage unavailable — proceed with in-memory dismiss only
+    }
+    setShowInstallGuide(false);
+  };
+
+  const installSteps = device === 'ios' || device === 'ipados'
+    ? ['Open this page in Safari', 'Tap the Share button at the bottom', "Select 'Add to Home Screen'"]
+    : device === 'android'
+    ? ['Tap the menu (⋮) in your browser', "Select 'Add to Home Screen' or 'Install app'"]
+    : ['Click the install icon (⊕) in your browser\'s address bar', "Select 'Install'"]
+
   return (
     <div className="pt-2 pb-4 space-y-16">
+      {/* Install Instructions */}
+      {showInstallGuide && (
+        <section className="asymmetric-radius bg-surface-container-high p-6 flex flex-col gap-4">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <span className="material-symbols-outlined text-secondary text-2xl">install_mobile</span>
+              <h3 className="text-sm font-bold tracking-[0.05em] uppercase text-on-surface">Install the App</h3>
+            </div>
+            <button
+              onClick={dismissInstallGuide}
+              aria-label="Dismiss install instructions"
+              className="text-on-surface-variant hover:opacity-70 transition-opacity shrink-0"
+            >
+              <span className="material-symbols-outlined">close</span>
+            </button>
+          </div>
+          <ol className="space-y-2">
+            {installSteps.map((step, i) => (
+              <li key={i} className="flex items-start gap-3 text-sm text-on-surface-variant">
+                <span className="font-bold shrink-0 text-on-surface">{i + 1}.</span>
+                <span>{step}</span>
+              </li>
+            ))}
+          </ol>
+        </section>
+      )}
       {/* Data Sources */}
       <section className="space-y-8">
         <div className="flex items-center justify-between">
@@ -77,7 +130,7 @@ function InfoPage({ weather, weatherWarning, loading, onBack }) {
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-bold tracking-[0.05em] uppercase bg-secondary-container text-on-secondary-container">Beta</span>
               </div>
               <p className="text-sm text-on-surface-variant max-w-md">
-                Critical alerts and meteorological hazards aggregated from national weather warning systems where available, falling back to global sources.
+                Critical alerts and meteorological hazards from national weather warning systems where available, falling back to global sources.
               </p>
               <br />
               <span className="text-xs text-on-surface-variant">
@@ -201,6 +254,8 @@ function InfoPage({ weather, weatherWarning, loading, onBack }) {
           </div>
         </div>
       </section>
+
+      <p className="text-center text-xs text-on-surface-variant/50">v{version}</p>
     </div>
   );
 }
