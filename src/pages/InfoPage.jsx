@@ -1,5 +1,7 @@
 
 import { version } from '../../package.json';
+import { useState } from 'react';
+import { getDevice } from '../helpers.js';
 
 const formatProviders = (providers) => {
   if (!providers) return null;
@@ -14,8 +16,50 @@ const formatProviders = (providers) => {
 function InfoPage({ weather, weatherWarning, loading, onBack }) {
   const weatherProvider = formatProviders(weather?.providers);
   const warningProvider = weatherWarning?.provider;
+  const device = getDevice();
+  const [showInstallGuide, setShowInstallGuide] = useState(
+    () => (device === 'android' || device === 'ios') && !localStorage.getItem('discardInstall')
+  );
+
+  const dismissInstallGuide = () => {
+    localStorage.setItem('discardInstall', new Date().toISOString());
+    setShowInstallGuide(false);
+  };
+
+  const installSteps = device === 'ios'
+    ? ['Open this page in Safari', 'Tap the Share button at the bottom', "Select 'Add to Home Screen'"]
+    : device === 'android'
+    ? ['Tap the menu (⋮) in your browser', "Select 'Add to Home Screen' or 'Install app'"]
+    : ['Click the install icon (⊕) in your browser\'s address bar', "Select 'Install'"]
+
   return (
     <div className="pt-2 pb-4 space-y-16">
+      {/* Install Instructions */}
+      {showInstallGuide && (
+        <section className="asymmetric-radius bg-surface-container-high p-6 flex flex-col gap-4">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <span className="material-symbols-outlined text-secondary text-2xl">install_mobile</span>
+              <h3 className="text-sm font-bold tracking-[0.05em] uppercase text-on-surface">Install the App</h3>
+            </div>
+            <button
+              onClick={dismissInstallGuide}
+              aria-label="Dismiss install instructions"
+              className="text-on-surface-variant hover:opacity-70 transition-opacity shrink-0"
+            >
+              <span className="material-symbols-outlined">close</span>
+            </button>
+          </div>
+          <ol className="space-y-2">
+            {installSteps.map((step, i) => (
+              <li key={i} className="flex items-start gap-3 text-sm text-on-surface-variant">
+                <span className="font-bold shrink-0 text-on-surface">{i + 1}.</span>
+                <span>{step}</span>
+              </li>
+            ))}
+          </ol>
+        </section>
+      )}
       {/* Data Sources */}
       <section className="space-y-8">
         <div className="flex items-center justify-between">
