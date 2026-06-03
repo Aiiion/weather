@@ -5,7 +5,6 @@
   "type": "module",
   "dependencies": {
     "@fontsource/inter": "^5.2.8",
-    "material-symbols": "^0.44.0",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "web-vitals": "^5.2.0"
