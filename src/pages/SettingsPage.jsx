@@ -30,23 +30,27 @@ function Toggle({ enabled, onToggle, label }) {
   );
 }
 
-const UNITS = ["°C", "°F"];
+// Internal measure values stay "°C"/"°F" (used across the app); only the label changes.
+const UNITS = [
+  { value: "°C", label: "Metric" },
+  { value: "°F", label: "Imperial" },
+];
 
 function UnitToggle({ measure, onChange }) {
   return (
     <div className="flex items-center bg-background rounded-full p-1">
-      {UNITS.map((unit) => (
+      {UNITS.map(({ value, label }) => (
         <button
-          key={unit}
-          onClick={() => onChange(unit)}
-          aria-pressed={measure === unit}
+          key={value}
+          onClick={() => onChange(value)}
+          aria-pressed={measure === value}
           className={`px-3 py-1 rounded-full text-sm font-medium transition-all duration-200 ${
-            measure === unit
+            measure === value
               ? "bg-surface-variant text-tertiary"
               : "text-on-surface-variant hover:text-primary"
           }`}
         >
-          {unit}
+          {label}
         </button>
       ))}
     </div>
@@ -73,9 +77,9 @@ function SettingsPage({ settings, onToggle, measure, onMeasureChange }) {
                 thermostat
               </span>
               <div className="flex flex-col">
-                <span className="text-on-surface text-sm font-medium">Temperature</span>
+                <span className="text-on-surface text-sm font-medium">Measurement system</span>
                 <span className="text-on-surface-variant text-xs">
-                  {measure === "°F" ? "Fahrenheit, wind in mph" : "Celsius, wind in m/s"}
+                  {measure === "°F" ? "°F, wind in mph" : "°C, wind in m/s"}
                 </span>
               </div>
             </div>
