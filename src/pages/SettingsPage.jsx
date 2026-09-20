@@ -30,46 +30,99 @@ function Toggle({ enabled, onToggle, label }) {
   );
 }
 
-function SettingsPage({ settings, onToggle }) {
+const UNITS = ["°C", "°F"];
+
+function UnitToggle({ measure, onChange }) {
+  return (
+    <div className="flex items-center bg-background rounded-full p-1">
+      {UNITS.map((unit) => (
+        <button
+          key={unit}
+          onClick={() => onChange(unit)}
+          aria-pressed={measure === unit}
+          className={`px-3 py-1 rounded-full text-sm font-medium transition-all duration-200 ${
+            measure === unit
+              ? "bg-surface-variant text-tertiary"
+              : "text-on-surface-variant hover:text-primary"
+          }`}
+        >
+          {unit}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function SettingsPage({ settings, onToggle, measure, onMeasureChange }) {
   return (
     <div className="space-y-10 pb-4">
-      <section className="space-y-1">
-        <h2 className="font-['Inter'] text-[1.125rem] font-medium tracking-tight text-primary">
-          Cards
-        </h2>
-        <p className="text-on-surface-variant text-sm">
-          Choose which cards appear on the Landing page.
-        </p>
-      </section>
+      <div className="space-y-4">
+        <section className="space-y-1">
+          <h2 className="font-['Inter'] text-[1.125rem] font-medium tracking-tight text-primary">
+            Units
+          </h2>
+          <p className="text-on-surface-variant text-sm">
+            Temperature and wind speed units used across the app.
+          </p>
+        </section>
 
-      <section className="space-y-2">
-        {Object.entries(CARD_LABELS).map(([key, { label, icon }]) => {
-          const isDefault = CARD_DEFAULTS[key];
-          return (
-            <div
-              key={key}
-              className="flex items-center justify-between p-4 bg-surface-container-low asymmetric-radius"
-            >
-              <div className="flex items-center gap-3">
-                <span className="material-symbols-outlined text-[1.25rem] text-on-surface-variant">
-                  {icon}
+        <section>
+          <div className="flex items-center justify-between p-4 bg-surface-container-low asymmetric-radius">
+            <div className="flex items-center gap-3">
+              <span className="material-symbols-outlined text-[1.25rem] text-on-surface-variant">
+                thermostat
+              </span>
+              <div className="flex flex-col">
+                <span className="text-on-surface text-sm font-medium">Temperature</span>
+                <span className="text-on-surface-variant text-xs">
+                  {measure === "°F" ? "Fahrenheit, wind in mph" : "Celsius, wind in m/s"}
                 </span>
-                <div className="flex flex-col">
-                  <span className="text-on-surface text-sm font-medium">{label}</span>
-                  {isDefault && (
-                    <span className="text-on-surface-variant text-xs">Shown by default</span>
-                  )}
-                </div>
               </div>
-              <Toggle
-                enabled={settings[key]}
-                onToggle={() => onToggle(key)}
-                label={label}
-              />
             </div>
-          );
-        })}
-      </section>
+            <UnitToggle measure={measure} onChange={onMeasureChange} />
+          </div>
+        </section>
+      </div>
+
+      <div className="space-y-4">
+        <section className="space-y-1">
+          <h2 className="font-['Inter'] text-[1.125rem] font-medium tracking-tight text-primary">
+            Cards
+          </h2>
+          <p className="text-on-surface-variant text-sm">
+            Choose which cards appear on the Landing page.
+          </p>
+        </section>
+
+        <section className="space-y-2">
+          {Object.entries(CARD_LABELS).map(([key, { label, icon }]) => {
+            const isDefault = CARD_DEFAULTS[key];
+            return (
+              <div
+                key={key}
+                className="flex items-center justify-between p-4 bg-surface-container-low asymmetric-radius"
+              >
+                <div className="flex items-center gap-3">
+                  <span className="material-symbols-outlined text-[1.25rem] text-on-surface-variant">
+                    {icon}
+                  </span>
+                  <div className="flex flex-col">
+                    <span className="text-on-surface text-sm font-medium">{label}</span>
+                    {isDefault && (
+                      <span className="text-on-surface-variant text-xs">Shown by default</span>
+                    )}
+                  </div>
+                </div>
+                <Toggle
+                  enabled={settings[key]}
+                  onToggle={() => onToggle(key)}
+                  label={label}
+                />
+              </div>
+            );
+          })}
+        </section>
+      </div>
     </div>
   );
 }

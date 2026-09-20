@@ -4,3 +4,4 @@ const ORIGIN = import.meta.env.VITE_ENV === "dev" ? DEV_ORIGIN : API_ORIGIN;
 
 export const BASE_URL = `${ORIGIN}/v1/weather?days=5&`;
 export const IP_LOCATION_URL = `${API_ORIGIN}/ip-location`;
+export const LOCATIONS_URL = `${ORIGIN}/v1/locations`;

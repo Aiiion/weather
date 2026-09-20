@@ -5,10 +5,13 @@ import WeatherPage from "./pages/WeatherPage.jsx";
 import DetailsPage from "./pages/DetailsPage.jsx";
 import InfoPage from "./pages/InfoPage.jsx";
 import SettingsPage from "./pages/SettingsPage.jsx";
+import LocationSearch from "./components/LocationSearch/LocationSearch.jsx";
+import SaveLocation from "./components/SaveLocation/SaveLocation.jsx";
 import { useEffect, useState, useRef } from "react";
 import { BASE_URL, IP_LOCATION_URL } from "./constants.js";
 import { getDevice } from "./helpers.js";
 import { useCardSettings } from "./hooks/useCardSettings.js";
+import { useUnits } from "./hooks/useUnits.js";
 
 const createApiUrl = ({ lat, lon }, measureValue) => {
   const units = measureValue == "°C" ? "metric" : "imperial";
@@ -17,11 +20,16 @@ const createApiUrl = ({ lat, lon }, measureValue) => {
 
 const toJSON = (response) => response.json();
 
+const headerButtonClass =
+  "flex items-center justify-center bg-surface-container-low rounded-full p-2 text-on-surface-variant hover:text-primary transition-colors";
+
 // Weather condition icons are provided by helpers: `getWeatherIcon` and `getWeatherIconFromDescription`.
 
 function App() {
   const [city, setCity] = useState();
-  const [measure, setMeasure] = useState("°C");
+  const { measure, setMeasure } = useUnits();
+  // A location saved in the API; null means the device's own location
+  const [selectedLocation, setSelectedLocation] = useState(null);
   const distanceTime = measure === "°C" ? "m/s" : "mph";
   const [weather, setWeather] = useState(null);
   const [forecast, setForecast] = useState([]);
@@ -31,6 +39,8 @@ function App() {
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isWarningOpen, setIsWarningOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isSaveOpen, setIsSaveOpen] = useState(false);
   const [permissionStatus, setPermissionStatus] = useState("pending");
   const [precipitation, setPrecipitation] = useState(0);
   const [pollution, setPollution] = useState(null);
@@ -72,11 +82,12 @@ function App() {
     
     // Clear stale data and set loading state
     setLoading(true);
+    setError(false);
     setWeather(null);
     setForecast([]);
     setWeatherWarning(null);
     
-    if (!navigator.geolocation) {
+    if (!selectedLocation && !navigator.geolocation) {
       alert("Geolocation is not supported by your browser");
       setLoading(false);
       return;
@@ -86,7 +97,7 @@ function App() {
     const controller = new AbortController();
     abortControllerRef.current = controller;
     
-    getWeatherData(measure, controller.signal);
+    getWeatherData(measure, controller.signal, selectedLocation);
     
     return () => {
       // Cleanup: abort on unmount or before next effect
@@ -96,7 +107,7 @@ function App() {
         geoId.current = null;
       }
     };
-  }, [measure]);
+  }, [measure, selectedLocation]);
 
   const getLatLon = () => {
     if (coordsRef.current.lat && coordsRef.current.lon) {
@@ -161,10 +172,12 @@ function App() {
         setLoading(false);
       });
   };
-  const getWeatherData = (measureValue, signal) => {
+  const getWeatherData = (measureValue, signal, location = null) => {
     setCity(null);
-    getLatLon()
-      .then(cacheCoords)
+    const coordsPromise = location
+      ? Promise.resolve({ lat: location.lat, lon: location.lon })
+      : getLatLon().then(cacheCoords);
+    coordsPromise
       .then((coords) => createApiUrl(coords, measureValue))
       .then((url) => fetch(url, { signal }))
       .then(toJSON)
@@ -174,7 +187,12 @@ function App() {
           updateData(res.data);
         }
       })
-      .then(() => navigator.geolocation.clearWatch(geoId.current))
+      .then(() => {
+        if (geoId.current != null) {
+          navigator.geolocation.clearWatch(geoId.current);
+          geoId.current = null;
+        }
+      })
       .catch((err) => {
         // Ignore abort errors, handle other errors
         if (err.name === 'AbortError') {
@@ -206,10 +224,6 @@ function App() {
     } else {
       setWeatherWarning(null);
     }
-  };
-
-  const switchTemp = () => {
-    setMeasure((prev) => (prev === "°F" ? "°C" : "°F"));
   };
 
   function refresh() {
@@ -246,13 +260,15 @@ function App() {
       <header className="bg-background flex justify-between items-center px-4 py-4 w-full box-border">
         <div className="max-w-[1200px] mx-auto w-full flex justify-between items-center">
         <div className="flex items-center gap-2">
-          <span className="material-symbols-outlined text-primary">location_on</span>
+          <span className="material-symbols-outlined text-primary">
+            {selectedLocation ? "bookmark" : "location_on"}
+          </span>
           <div className="flex flex-col">
             {loading ? (
               <div className="h-6 w-32 bg-surface-container-low rounded animate-pulse"></div>
             ) : (
               <h1 className="font-['Inter'] font-semibold tracking-[-0.02em] text-[1.25rem] text-primary">
-                {city}
+                {selectedLocation ? selectedLocation.name : city}
                 {weatherWarning && (
                   <span className="ml-2 inline-flex">
                     <WarningIcon
@@ -264,7 +280,10 @@ function App() {
                 )}
               </h1>
             )}
-            {permissionStatus === "denied" && !loading && (
+            {selectedLocation && !loading && city && city !== selectedLocation.name && (
+              <span className="text-xs text-on-surface-variant">{city}</span>
+            )}
+            {permissionStatus === "denied" && !loading && !selectedLocation && (
               <button
                 onClick={getLocationFromIp}
                 className="text-xs text-on-surface-variant hover:text-primary border border-surface-container-high hover:border-primary transition-colors rounded-full px-3 py-1 text-left w-fit"
@@ -274,38 +293,36 @@ function App() {
             )}
           </div>
         </div>
-  {error ? (
-    <button
-      onClick={refresh}
-      className="flex items-center justify-center bg-surface-container-low rounded-full p-2 text-on-surface-variant hover:text-primary transition-colors"
-      title="Retry"
-    >
-      <span className="material-symbols-outlined">refresh</span>
-    </button>
-  ) : (
-    <div className="flex items-center bg-surface-container-low rounded-full p-1">
-      <button
-        onClick={() => { if (measure !== "°C") switchTemp(); }}
-        className={`px-3 py-1 rounded-full text-sm font-medium transition-all duration-200 ${
-          measure === "°C" 
-            ? 'bg-surface-variant text-tertiary' 
-            : 'text-on-surface-variant hover:text-primary'
-        }`}
-      >
-        °C
-      </button>
-      <button
-        onClick={() => { if (measure !== "°F") switchTemp(); }}
-        className={`px-3 py-1 rounded-full text-sm font-medium transition-all duration-200 ${
-          measure === "°F" 
-            ? 'bg-surface-variant text-tertiary' 
-            : 'text-on-surface-variant hover:text-primary'
-        }`}
-      >
-        °F
-      </button>
-    </div>
-  )}
+        <div className="flex items-center gap-2">
+          {error && (
+            <button
+              onClick={refresh}
+              className={headerButtonClass}
+              title="Retry"
+              aria-label="Retry"
+            >
+              <span className="material-symbols-outlined">refresh</span>
+            </button>
+          )}
+          {weather && !selectedLocation && (
+            <button
+              onClick={() => setIsSaveOpen(true)}
+              className={headerButtonClass}
+              title="Save this location"
+              aria-label="Save this location"
+            >
+              <span className="material-symbols-outlined">add</span>
+            </button>
+          )}
+          <button
+            onClick={() => setIsSearchOpen(true)}
+            className={headerButtonClass}
+            title="Search saved locations"
+            aria-label="Search saved locations"
+          >
+            <span className="material-symbols-outlined">search</span>
+          </button>
+        </div>
         </div>
       </header>
 
@@ -326,6 +343,8 @@ function App() {
           <SettingsPage
             settings={cardSettings}
             onToggle={toggleCard}
+            measure={measure}
+            onMeasureChange={setMeasure}
           />
         )}
         {activeNav === "details" && (
@@ -410,6 +429,25 @@ function App() {
           This feature is in beta, please check your local weather service for official warnings.
         </span>
       </WarningModal>
+
+      {isSearchOpen && (
+        <LocationSearch
+          selectedLocation={selectedLocation}
+          onClose={() => setIsSearchOpen(false)}
+          onSelect={(location) => {
+            setSelectedLocation(location);
+            setIsSearchOpen(false);
+          }}
+        />
+      )}
+
+      {isSaveOpen && (
+        <SaveLocation
+          providerName={city}
+          coords={coordsRef.current}
+          onClose={() => setIsSaveOpen(false)}
+        />
+      )}
     </div>
   );
 }
