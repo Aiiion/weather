@@ -12,6 +12,8 @@ const rowClass =
 function LocationSearch({ onClose, onSelect, selectedLocation }) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
+  // The trimmed query the current `results` were fetched for
+  const [resultsQuery, setResultsQuery] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
@@ -34,6 +36,7 @@ function LocationSearch({ onClose, onSelect, selectedLocation }) {
         })
         .then(({ data }) => {
           setResults(Array.isArray(data) ? data : []);
+          setResultsQuery(trimmed);
           setLoading(false);
         })
         .catch((err) => {
@@ -49,15 +52,16 @@ function LocationSearch({ onClose, onSelect, selectedLocation }) {
     };
   }, [query]);
 
+  const trimmedQuery = query.trim();
+  const resultsAreCurrent = !loading && !error && resultsQuery === trimmedQuery;
+
   const handleKeyDown = (e) => {
     if (e.key === "Escape") {
       onClose();
-    } else if (e.key === "Enter" && results.length > 0) {
+    } else if (e.key === "Enter" && resultsAreCurrent && results.length > 0) {
       onSelect(results[0]);
     }
   };
-
-  const trimmedQuery = query.trim();
 
   return (
     <WarningModal open onClose={onClose}>

@@ -187,7 +187,12 @@ function App() {
           updateData(res.data);
         }
       })
-      .then(() => navigator.geolocation.clearWatch(geoId.current))
+      .then(() => {
+        if (geoId.current != null) {
+          navigator.geolocation.clearWatch(geoId.current);
+          geoId.current = null;
+        }
+      })
       .catch((err) => {
         // Ignore abort errors, handle other errors
         if (err.name === 'AbortError') {
