@@ -68,6 +68,13 @@ function SaveLocation({ onClose, providerName, coords }) {
           <p className="text-on-surface-variant text-sm mt-2">
             Give this location a name so you can find it again from search.
           </p>
+          <p className="text-on-surface-variant text-xs mt-2 flex items-start gap-1.5">
+            <span className="material-symbols-outlined text-[1rem] shrink-0">public</span>
+            <span>
+              Saved locations are shared: the name and coordinates will be visible to
+              everyone who uses this app, and they can't be deleted once saved.
+            </span>
+          </p>
           <input
             type="text"
             autoFocus
